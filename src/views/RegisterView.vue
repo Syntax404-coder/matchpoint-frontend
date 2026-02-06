@@ -24,7 +24,9 @@
         <option value="Both">Both</option>
       </select>
 
-
+      <select v-model="form.country" disabled>
+        <option value="Philippines">Philippines</option>
+      </select>
       <select v-model="form.province" required @change="onProvinceChange">
         <option value="" disabled hidden>Select Province</option>
         <option v-for="prov in provinces" :key="prov" :value="prov">{{ prov }}</option>
@@ -70,6 +72,7 @@ const form = ref({
   firstName: '',
   lastName: '',
   email: '',
+  country: 'Philippines',
   password: '',
   birthdate: '',
   gender: '',
@@ -162,7 +165,7 @@ const handleRegister = async () => {
         birthdate: form.value.birthdate,
         gender: form.value.gender,
         genderInterest: form.value.genderInterest,
-        country: 'Philippines',
+        country: form.value.country,
         city: `${form.value.city}, ${form.value.province}`,
         bio: form.value.bio,
         mobile: form.value.mobile,                     

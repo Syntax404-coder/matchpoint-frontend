@@ -3,7 +3,6 @@
     <div class="header">
       <div class="logo-wrapper">
         <img src="/icon.png" alt="MatchPoint Logo" class="logo" />
-        <h1 class="app-name">MatchPoint</h1>
       </div>
       <div class="nav">
         <router-link to="/matches">Messages</router-link>
@@ -282,12 +281,7 @@ const logout = () => {
   margin-bottom: 20px;
 }
 
-.header h1 {
-  font-size: 32px;
-  font-weight: 700;
-  color: #3B82F6;
-  letter-spacing: -0.5px;
-}
+
 
 .nav {
   display: flex;

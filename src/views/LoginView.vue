@@ -2,7 +2,6 @@
   <div class="login">
     <!-- Logo -->
     <img src="/icon.png" alt="MatchPoint Logo" class="logo" />
-    <div class="app-name">MatchPoint</div>
     <h1>Login</h1>
 
     <!-- Form -->
@@ -113,12 +112,7 @@ const handleLogin = async () => {
   object-fit: contain;
 }
 
-.app-name {
-  font-size: 36px;
-  font-weight: 800;
-  margin-bottom: 8px;
-  color: #3B82F6;
-}
+
 
 h1 {
   margin: 0 0 32px 0;

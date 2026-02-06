@@ -1,7 +1,6 @@
 <template>
   <div class="upload-photos">
     <img src="/icon.png" alt="MatchPoint Logo" class="logo" />
-    <div class="app-name">MatchPoint</div>
 
     <h1>Upload Your Photos</h1>
     <p>Upload at least 1 photo to continue (max 5)</p>
@@ -148,13 +147,7 @@ const goToDeck = () => {
     object-fit: contain;
   }
   
-  .app-name {
-    font-size: 36px;
-    font-weight: 800;
-    margin-bottom: 8px;
-    color: #3B82F6;
-    letter-spacing: -1px;
-  }
+
   
   h1 {
     margin: 0 0 24px 0;

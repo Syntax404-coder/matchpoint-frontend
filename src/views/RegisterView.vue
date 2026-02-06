@@ -24,7 +24,7 @@
         <option value="Both">Both</option>
       </select>
 
-      <select v-model="form.country" disabled>
+      <select v-model="form.country" required>
         <option value="Philippines">Philippines</option>
       </select>
       <select v-model="form.province" required @change="onProvinceChange">
@@ -65,6 +65,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMutation } from '@vue/apollo-composable'
 import { gql } from '@apollo/client/core'
+import { philippines as provinceCities } from '../data/philippines'
 
 const router = useRouter()
 
@@ -100,20 +101,7 @@ const REGISTER_USER = gql`
 const { mutate: registerUser, loading } = useMutation(REGISTER_USER)
 
 // Province to Cities mapping
-const provinceCities = {
-  'Metro Manila': ['Manila', 'Quezon City', 'Makati', 'Taguig', 'Pasig', 'Mandaluyong', 'San Juan', 'Pasay', 'Paranaque', 'Las Pinas', 'Muntinlupa', 'Caloocan', 'Malabon', 'Navotas', 'Valenzuela', 'Marikina'],
-  'Cebu': ['Cebu City', 'Mandaue', 'Lapu-Lapu', 'Talisay', 'Danao', 'Carcar', 'Toledo'],
-  'Davao del Sur': ['Davao City', 'Digos', 'Bansalan', 'Hagonoy', 'Magsaysay'],
-  'Bukidnon': ['Malaybalay', 'Valencia', 'Maramag', 'Don Carlos', 'Quezon'],
-  'Pampanga': ['San Fernando', 'Angeles City', 'Mabalacat', 'Porac', 'Guagua'],
-  'Laguna': ['Santa Rosa', 'Calamba', 'San Pedro', 'Binan', 'Cabuyao', 'Los Banos'],
-  'Batangas': ['Batangas City', 'Lipa', 'Tanauan', 'Santo Tomas', 'Nasugbu'],
-  'Cavite': ['Bacoor', 'Imus', 'Dasmarinas', 'General Trias', 'Cavite City', 'Tagaytay'],
-  'Rizal': ['Antipolo', 'Cainta', 'Taytay', 'Angono', 'Binangonan'],
-  'Bulacan': ['Malolos', 'Meycauayan', 'San Jose del Monte', 'Marilao', 'Bocaue'],
-  'Iloilo': ['Iloilo City', 'Oton', 'Pavia', 'Santa Barbara', 'Leganes'],
-  'Negros Occidental': ['Bacolod', 'Silay', 'Talisay', 'Victorias', 'Sagay']
-}
+// Province to Cities mapping imported from data/philippines.js
 
 const provinces = Object.keys(provinceCities)
 

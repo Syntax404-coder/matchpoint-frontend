@@ -7,6 +7,7 @@
       <input v-model="form.lastName" placeholder="Last Name" required />
       <input v-model="form.email" type="email" placeholder="Email" required />
       <input v-model="form.password" type="password" placeholder="Password" required />
+      <input v-model="form.confirmPassword" type="password" placeholder="Confirm Password" required />
 
       <div class="date-field">
         <label>Birthdate</label>
@@ -87,7 +88,8 @@ const form = ref({
   bio: '',
   mobile: '',               
   school: '',               
-  sexualOrientation: ''     
+  sexualOrientation: '',
+  confirmPassword: ''     
 })
 
 const error = ref(null)
@@ -140,6 +142,12 @@ const handleRegister = async () => {
       error.value = "You must be at least 18 years old to register"
       return
     }
+  }
+
+  // Password match validation
+  if (form.value.password !== form.value.confirmPassword) {
+    error.value = "Passwords do not match"
+    return
   }
 
   if (!/^\+?\d{10,15}$/.test(form.value.mobile)) {

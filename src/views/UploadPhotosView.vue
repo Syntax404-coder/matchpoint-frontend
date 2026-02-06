@@ -1,6 +1,6 @@
 <template>
   <div class="upload-photos">
-    <img src="/icon.jpg" alt="MatchPoint Logo" class="logo" />
+    <img src="/icon.png" alt="MatchPoint Logo" class="logo" />
     <div class="app-name">MatchPoint</div>
 
     <h1>Upload Your Photos</h1>
@@ -152,9 +152,7 @@ const goToDeck = () => {
     font-size: 36px;
     font-weight: 800;
     margin-bottom: 8px;
-    background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #3B82F6;
     letter-spacing: -1px;
   }
   
@@ -162,9 +160,7 @@ const goToDeck = () => {
     margin: 0 0 24px 0;
     font-size: 32px;
     font-weight: 700;
-    background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #3B82F6;
     letter-spacing: -0.5px;
   }
   
@@ -188,14 +184,14 @@ const goToDeck = () => {
   
   input[type="file"]:focus {
     outline: none;
-    border-color: #ff7575;
+    border-color: #3B82F6;
     background: #ffffff;
-    box-shadow: 0 0 0 3px rgba(255, 117, 117, 0.1);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
   
   button {
     padding: 14px 24px;
-    background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
+    background: #3B82F6;
     color: white;
     border: none;
     border-radius: 8px;
@@ -205,18 +201,18 @@ const goToDeck = () => {
     transition: all 0.2s ease;
     margin: 8px 0;
     width: 100%;
-    box-shadow: 0 2px 8px rgba(246, 72, 59, 0.3);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
   }
   
   button:hover:not(:disabled) {
-    background: linear-gradient(135deg, #ff7575 0%, #ea580c 100%);
-    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+    background: #2563EB;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
     transform: translateY(-1px);
   }
   
   button:active:not(:disabled) {
     transform: translateY(0);
-    box-shadow: 0 2px 6px rgba(246, 72, 59, 0.3);
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
   }
   
   button:disabled {
@@ -227,13 +223,13 @@ const goToDeck = () => {
   }
   
   .error {
-    color: #d32f2f;
-    background: #ffebee;
+    color: #EF4444;
+    background: #FEF2F2;
     padding: 12px 16px;
     border-radius: 8px;
     font-size: 14px;
     margin: 12px 0;
-    border-left: 4px solid #d32f2f;
+    border-left: 4px solid #EF4444;
     text-align: left;
   }
   
@@ -316,9 +312,9 @@ const goToDeck = () => {
 
 input[type="file"]:focus {
   outline: none;
-  border-color: #ff7575;
+  border-color: #3B82F6;
   background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(255, 117, 117, 0.1);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
   </style>

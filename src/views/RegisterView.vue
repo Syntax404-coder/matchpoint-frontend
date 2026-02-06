@@ -7,7 +7,8 @@
       <input v-model="form.lastName" placeholder="Last Name" required />
       <input v-model="form.email" type="email" placeholder="Email" required />
       <input v-model="form.password" type="password" placeholder="Password" required />
-      <input v-model="form.confirmPassword" type="password" placeholder="Confirm Password" required />
+      <input v-model="form.confirmPassword" type="password" placeholder="Confirm Password" required :class="{ 'input-error': passwordMismatch }" />
+      <p v-if="passwordMismatch" class="field-error">Passwords do not match</p>
 
       <div class="date-field">
         <label>Birthdate</label>
@@ -38,7 +39,7 @@
       </select>
 
       <select v-model="form.city" required :disabled="!form.province">
-        <option value="" disabled hidden>Select City</option>
+        <option value="" disabled hidden>City / Municipality</option>
         <option v-for="city in availableCities" :key="city" :value="city">{{ city }}</option>
       </select>
       <input v-model="form.mobile" type="tel" placeholder="Mobile Number" required />
@@ -119,6 +120,11 @@ const availableCities = computed(() => {
 const onProvinceChange = () => {
   form.value.city = ''
 }
+
+// Real-time password match validation
+const passwordMismatch = computed(() => {
+  return form.value.confirmPassword.length > 0 && form.value.password !== form.value.confirmPassword
+})
 
 // Calculate age from birthdate
 const calculateAge = (birthdate) => {
@@ -300,6 +306,22 @@ button:disabled {
   font-size: 14px;
   margin: 0;
   border-left: 4px solid #EF4444;
+}
+
+.input-error {
+  border-color: #EF4444 !important;
+  background: #FEF2F2 !important;
+}
+
+.input-error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+}
+
+.field-error {
+  color: #EF4444;
+  font-size: 13px;
+  margin: -8px 0 0 0;
+  padding: 0;
 }
 
 .date-field {

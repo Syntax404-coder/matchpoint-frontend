@@ -25,8 +25,15 @@
       </select>
 
 
-      <input v-model="form.country" placeholder="Country" required />
-      <input v-model="form.city" placeholder="City" required />
+      <select v-model="form.province" required @change="onProvinceChange">
+        <option value="" disabled hidden>Select Province</option>
+        <option v-for="prov in provinces" :key="prov" :value="prov">{{ prov }}</option>
+      </select>
+
+      <select v-model="form.city" required :disabled="!form.province">
+        <option value="" disabled hidden>Select City</option>
+        <option v-for="city in availableCities" :key="city" :value="city">{{ city }}</option>
+      </select>
       <input v-model="form.mobile" type="tel" placeholder="Mobile Number" required />
 
       <input v-model="form.school" placeholder="School (optional)" />
@@ -52,7 +59,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMutation } from '@vue/apollo-composable'
 import { gql } from '@apollo/client/core'
@@ -67,7 +74,7 @@ const form = ref({
   birthdate: '',
   gender: '',
   genderInterest: '',
-  country: 'Philippines',
+  province: '',
   city: '',
   bio: '',
   mobile: '',               
@@ -89,8 +96,56 @@ const REGISTER_USER = gql`
 
 const { mutate: registerUser, loading } = useMutation(REGISTER_USER)
 
+// Province to Cities mapping
+const provinceCities = {
+  'Metro Manila': ['Manila', 'Quezon City', 'Makati', 'Taguig', 'Pasig', 'Mandaluyong', 'San Juan', 'Pasay', 'Paranaque', 'Las Pinas', 'Muntinlupa', 'Caloocan', 'Malabon', 'Navotas', 'Valenzuela', 'Marikina'],
+  'Cebu': ['Cebu City', 'Mandaue', 'Lapu-Lapu', 'Talisay', 'Danao', 'Carcar', 'Toledo'],
+  'Davao del Sur': ['Davao City', 'Digos', 'Bansalan', 'Hagonoy', 'Magsaysay'],
+  'Bukidnon': ['Malaybalay', 'Valencia', 'Maramag', 'Don Carlos', 'Quezon'],
+  'Pampanga': ['San Fernando', 'Angeles City', 'Mabalacat', 'Porac', 'Guagua'],
+  'Laguna': ['Santa Rosa', 'Calamba', 'San Pedro', 'Binan', 'Cabuyao', 'Los Banos'],
+  'Batangas': ['Batangas City', 'Lipa', 'Tanauan', 'Santo Tomas', 'Nasugbu'],
+  'Cavite': ['Bacoor', 'Imus', 'Dasmarinas', 'General Trias', 'Cavite City', 'Tagaytay'],
+  'Rizal': ['Antipolo', 'Cainta', 'Taytay', 'Angono', 'Binangonan'],
+  'Bulacan': ['Malolos', 'Meycauayan', 'San Jose del Monte', 'Marilao', 'Bocaue'],
+  'Iloilo': ['Iloilo City', 'Oton', 'Pavia', 'Santa Barbara', 'Leganes'],
+  'Negros Occidental': ['Bacolod', 'Silay', 'Talisay', 'Victorias', 'Sagay']
+}
+
+const provinces = Object.keys(provinceCities)
+
+const availableCities = computed(() => {
+  if (!form.value.province) return []
+  return provinceCities[form.value.province] || []
+})
+
+const onProvinceChange = () => {
+  form.value.city = ''
+}
+
+// Calculate age from birthdate
+const calculateAge = (birthdate) => {
+  const today = new Date()
+  const birth = new Date(birthdate)
+  let age = today.getFullYear() - birth.getFullYear()
+  const monthDiff = today.getMonth() - birth.getMonth()
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--
+  }
+  return age
+}
+
 const handleRegister = async () => {
   error.value = null
+
+  // Age validation - must be 18 or older
+  if (form.value.birthdate) {
+    const age = calculateAge(form.value.birthdate)
+    if (age < 18) {
+      error.value = "You must be at least 18 years old to register"
+      return
+    }
+  }
 
   if (!/^\+?\d{10,15}$/.test(form.value.mobile)) {
     error.value = "Mobile number must be 10-15 digits"
@@ -107,8 +162,8 @@ const handleRegister = async () => {
         birthdate: form.value.birthdate,
         gender: form.value.gender,
         genderInterest: form.value.genderInterest,
-        country: form.value.country,
-        city: form.value.city,
+        country: 'Philippines',
+        city: `${form.value.city}, ${form.value.province}`,
         bio: form.value.bio,
         mobile: form.value.mobile,                     
         school: form.value.school,                     
@@ -148,10 +203,7 @@ h1 {
   margin: 0 0 32px 0;
   font-size: 32px;
   font-weight: 700;
-  background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #3B82F6;
   text-align: center;
   letter-spacing: -0.5px;
 }
@@ -179,9 +231,9 @@ input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: #ff7575;
+  border-color: #3B82F6;
   background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(255, 117, 117, 0.1);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 input::placeholder,
@@ -206,7 +258,7 @@ textarea {
 
 button {
   padding: 14px 24px;
-  background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
+  background: #3B82F6;
   color: white;
   border: none;
   border-radius: 8px;
@@ -215,18 +267,18 @@ button {
   font-weight: 600;
   transition: all 0.2s ease;
   margin-top: 8px;
-  box-shadow: 0 2px 8px rgba(246, 72, 59, 0.3);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
 button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #ff7575 0%, #ea580c 100%);
-  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+  background: #2563EB;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
   transform: translateY(-1px);
 }
 
 button:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(246, 72, 59, 0.3);
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
 }
 
 button:disabled {
@@ -238,13 +290,13 @@ button:disabled {
 }
 
 .error {
-  color: #d32f2f;
-  background: #ffebee;
+  color: #EF4444;
+  background: #FEF2F2;
   padding: 12px 16px;
   border-radius: 8px;
   font-size: 14px;
   margin: 0;
-  border-left: 4px solid #d32f2f;
+  border-left: 4px solid #EF4444;
 }
 
 .register>p {
@@ -255,14 +307,14 @@ button:disabled {
 }
 
 .register>p a {
-  color: #ff7575;
+  color: #3B82F6;
   text-decoration: none;
   font-weight: 600;
   transition: color 0.2s ease;
 }
 
 .register>p a:hover {
-  color: #f97316;
+  color: #2563EB;
   text-decoration: underline;
 }
 

@@ -6,7 +6,7 @@
         <h1 class="app-name">MatchPoint</h1>
       </div>
       <div class="nav">
-        <router-link to="/matches">💬 Messages</router-link>
+        <router-link to="/matches">Messages</router-link>
         <button @click="logout">Logout</button>
       </div>
     </div>
@@ -44,8 +44,8 @@
         </div>
 
         <div class="card-info">
-          <h2>{{ deckUser.firstName }} {{ deckUser.lastName }}</h2>
-          <p>{{ deckUser.city }}</p>
+          <h2>{{ deckUser.firstName }}, {{ deckUser.age }}</h2>
+          <p>{{ deckUser.city }}, {{ deckUser.province }}</p>
           <p v-if="deckUser.bio">{{ deckUser.bio }}</p>
         </div>
 
@@ -65,10 +65,10 @@
     <!-- Match Modal -->
     <div v-if="showMatchModal" class="modal" @click="closeModal">
       <div class="modal-content" @click.stop>
-        <h2>🎉 It's a Match!</h2>
+        <h2>It is a Match</h2>
         <p>You and {{ matchedUser?.firstName }} liked each other!</p>
-        <button @click="goToMessages">Send Message</button>
-        <button @click="closeModal">Keep Swiping</button>
+        <button @click="goToMessages" class="send-message-btn">Send Message</button>
+        <button @click="closeModal" class="keep-swiping-btn">Keep Swiping</button>
       </div>
     </div>
   </div>
@@ -103,6 +103,8 @@ const SWIPE_DECK = gql`
       firstName
       lastName
       city
+      province
+      age
       bio
       gender
       role
@@ -196,7 +198,9 @@ const deckUser = computed(() => {
 
   return {
     ...user,
-    photos
+    photos,
+    age: user.age || '',
+    province: user.province || ''
   }
 })
 
@@ -281,9 +285,7 @@ const logout = () => {
 .header h1 {
   font-size: 32px;
   font-weight: 700;
-  background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #3B82F6;
   letter-spacing: -0.5px;
 }
 
@@ -294,18 +296,18 @@ const logout = () => {
 
 .nav a {
   text-decoration: none;
-  color: #ff7575;
+  color: #3B82F6;
   font-weight: 600;
   transition: color 0.2s ease;
 }
 
 .nav a:hover {
-  color: #f97316;
+  color: #2563EB;
 }
 
 .nav button {
   padding: 8px 16px;
-  background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
+  background: #3B82F6;
   color: white;
   border: none;
   border-radius: 8px;
@@ -315,7 +317,7 @@ const logout = () => {
 }
 
 .nav button:hover {
-  background: linear-gradient(135deg, #ff7575 0%, #ea580c 100%);
+  background: #2563EB;
 }
 
 .loading {
@@ -432,11 +434,11 @@ const logout = () => {
 }
 
 .dislike {
-  background: #ff4444;
+  background: #EF4444;
 }
 
 .like {
-  background: #44ff44;
+  background: #22C55E;
 }
 
 /* NO MORE USERS */
@@ -450,9 +452,7 @@ const logout = () => {
 .no-more h2 {
   font-size: 24px;
   margin-bottom: 8px;
-  background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #3B82F6;
 }
 
 /* MATCH MODAL */
@@ -478,9 +478,7 @@ const logout = () => {
 .modal-content h2 {
   font-size: 28px;
   margin-bottom: 12px;
-  background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #3B82F6;
 }
 
 .modal-content p {
@@ -489,17 +487,38 @@ const logout = () => {
   margin-bottom: 20px;
 }
 
-.modal-content button {
+.send-message-btn {
   padding: 12px 20px;
   font-size: 16px;
   border-radius: 8px;
   border: none;
   margin: 8px;
-  background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
+  background: #3B82F6;
   color: white;
   cursor: pointer;
   font-weight: 600;
   transition: all 0.2s ease;
+}
+
+.send-message-btn:hover {
+  background: #2563EB;
+}
+
+.keep-swiping-btn {
+  padding: 12px 20px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  margin: 8px;
+  background: #6B7280;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.keep-swiping-btn:hover {
+  background: #4B5563;
 }
 
 .modal-content button:hover {

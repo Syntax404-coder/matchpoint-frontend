@@ -70,7 +70,7 @@
               <tr>
                 <th>Name</th>
                 <th>Email</th>
-                <th>City</th>
+                <th>Province</th>
                 <th>Matches</th>
                 <th>Actions</th>
               </tr>
@@ -79,7 +79,7 @@
               <tr v-for="user in users" :key="user.id">
                 <td>{{ user.firstName }} {{ user.lastName }}</td>
                 <td>{{ user.email }}</td>
-                <td>{{ user.city }}</td>
+                <td>{{ user.province }}</td>
                 <td>{{ user.matchesCount }}</td>
                 <td class="actions">
                   <button @click="viewMatches(user.id)" class="view-btn">View</button>
@@ -247,6 +247,7 @@ const DASHBOARD_STATS = gql`
           lastName
           email
           city
+          province
           bio
           mobile
           school
@@ -466,25 +467,22 @@ const logout = () => {
   align-items: center;
   margin-bottom: 40px;
   padding: 24px;
-  background: #fcf5ef;
-  border: 1px solid #f974163e;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(10, 3, 3, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .header h1 {
   margin: 0;
   font-size: 32px;
   font-weight: 700;
-  background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #3B82F6;
   letter-spacing: -0.5px;
 }
 
 .logout-btn {
-  background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
+  background: #3B82F6;
   color: white;
   border: none;
   padding: 12px 24px;
@@ -493,12 +491,12 @@ const logout = () => {
   font-size: 14px;
   font-weight: 600;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(246, 72, 59, 0.3);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
 .logout-btn:hover {
-  background: linear-gradient(135deg, #ff7575 0%, #ea580c 100%);
-  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+  background: #2563EB;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
   transform: translateY(-1px);
 }
 
@@ -541,17 +539,14 @@ const logout = () => {
   margin: 0;
   font-size: 62px;
   font-weight: 800;
-  background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #3B82F6;
 }
 
 .popular-users,
 .users-section {
   margin-top: 40px;
-  background: #fcf5ef;
-  border: 1px solid #f974163e;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
   padding: 32px;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -562,10 +557,7 @@ const logout = () => {
   margin: 0 0 24px;
   font-size: 24px;
   font-weight: 700;
-  background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #3B82F6;
 }
 
 table {
@@ -582,7 +574,7 @@ td {
 }
 
 th {
-  background: #fcf5ef;
+  background: #F3F4F6;
   font-weight: 700;
   color: #333;
   font-size: 14px;
@@ -595,7 +587,7 @@ tbody tr {
 }
 
 tbody tr:hover {
-  background: #f1e0db;
+  background: #F9FAFB;
 }
 
 .actions {
@@ -616,35 +608,39 @@ tbody tr:hover {
 }
 
 .view-btn {
-  background: linear-gradient(135deg, #42b983 0%, #2c8a5f 100%);
+  background: #22C55E;
   color: white;
-  box-shadow: 0 2px 6px rgba(66, 185, 131, 0.3);
+  box-shadow: 0 2px 6px rgba(34, 197, 94, 0.3);
 }
 
 .view-btn:hover {
+  background: #16A34A;
   transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(66, 185, 131, 0.4);
+  box-shadow: 0 4px 10px rgba(34, 197, 94, 0.4);
 }
 
 .update-btn {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: #3B82F6;
   color: white;
   box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
 }
 
 .update-btn:hover {
+  background: #2563EB;
   transform: translateY(-1px);
   box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
 }
 
 .delete-btn {
-  background: transparent;
-  color: #dc2626;
-  box-shadow: none;
+  background: #EF4444;
+  color: white;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
 }
 
 .delete-btn:hover {
-  background: #fee2e2;
+  background: #DC2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
 }
 
 .modal {

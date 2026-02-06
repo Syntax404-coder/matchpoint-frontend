@@ -2,7 +2,7 @@
   <div class="deck">
     <div class="header">
       <div class="logo-wrapper">
-        <img src="/icon.jpg" alt="MatchPoint Logo" class="logo" />
+        <img src="/icon.png" alt="MatchPoint Logo" class="logo" />
         <h1 class="app-name">MatchPoint</h1>
       </div>
       <div class="nav">

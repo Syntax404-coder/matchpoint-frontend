@@ -95,21 +95,19 @@ const openChat = (matchId, otherUser) => {
 
 .header a {
   text-decoration: none;
-  color: #ff7575;
+  color: #3B82F6;
   font-weight: 600;
   transition: color 0.2s ease;
 }
 
 .header a:hover {
-  color: #f97316;
+  color: #2563EB;
 }
 
 .header h1 {
   font-size: 32px;
   font-weight: 700;
-  background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #3B82F6;
   text-align: right;
   margin: 0;
   flex: 1;
@@ -153,7 +151,7 @@ const openChat = (matchId, otherUser) => {
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-  border: 2px solid #ff7575;
+  border: 2px solid #3B82F6;
 }
 
 .info {
@@ -182,7 +180,7 @@ const openChat = (matchId, otherUser) => {
   position: absolute;
   top: 12px;
   right: 12px;
-  background: #ff4444;
+  background: #EF4444;
   color: white;
   padding: 4px 10px;
   border-radius: 50%;

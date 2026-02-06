@@ -1,7 +1,7 @@
 <template>
   <div class="login">
     <!-- Logo -->
-    <img src="/icon.jpg" alt="MatchPoint Logo" class="logo" />
+    <img src="/icon.png" alt="MatchPoint Logo" class="logo" />
     <div class="app-name">MatchPoint</div>
     <h1>Login</h1>
 
@@ -117,18 +117,14 @@ const handleLogin = async () => {
   font-size: 36px;
   font-weight: 800;
   margin-bottom: 8px;
-  background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #3B82F6;
 }
 
 h1 {
   margin: 0 0 32px 0;
   font-size: 32px;
   font-weight: 700;
-  background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #3B82F6;
 }
 
 form {
@@ -150,9 +146,9 @@ input {
 
 input:focus {
   outline: none;
-  border-color: #ff7575;
+  border-color: #3B82F6;
   background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(255, 117, 117, 0.1);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .password-wrapper {
@@ -177,7 +173,7 @@ input:focus {
 
 button {
   padding: 14px 24px;
-  background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
+  background: #3B82F6;
   color: white;
   border: none;
   border-radius: 8px;
@@ -187,6 +183,10 @@ button {
   transition: all 0.2s ease;
 }
 
+button:hover:not(:disabled) {
+  background: #2563EB;
+}
+
 button:disabled {
   background: #e0e0e0;
   color: #9e9e9e;
@@ -194,13 +194,13 @@ button:disabled {
 }
 
 .error {
-  color: #d32f2f;
-  background: #ffebee;
+  color: #EF4444;
+  background: #FEF2F2;
   padding: 12px 16px;
   border-radius: 8px;
   font-size: 14px;
   margin: 0;
-  border-left: 4px solid #d32f2f;
+  border-left: 4px solid #EF4444;
 }
 
 .login > p {
@@ -210,13 +210,13 @@ button:disabled {
 }
 
 .login > p a {
-  color: #ff7575;
+  color: #3B82F6;
   text-decoration: none;
   font-weight: 600;
 }
 
 .login > p a:hover {
-  color: #f97316;
+  color: #2563EB;
 }
 
 @media (max-width: 480px) {

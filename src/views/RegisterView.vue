@@ -8,7 +8,10 @@
       <input v-model="form.email" type="email" placeholder="Email" required />
       <input v-model="form.password" type="password" placeholder="Password" required />
 
-      <input v-model="form.birthdate" type="date" required />
+      <div class="date-field">
+        <label>Birthdate</label>
+        <input v-model="form.birthdate" type="date" required />
+      </div>
 
       <select v-model="form.gender" required>
         <option value="" disabled hidden>Select Gender</option>
@@ -289,6 +292,39 @@ button:disabled {
   font-size: 14px;
   margin: 0;
   border-left: 4px solid #EF4444;
+}
+
+.date-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+}
+
+.date-field label {
+  color: #757575;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.date-field input {
+  flex: 1;
+  border: none;
+  padding: 0;
+  font-size: 15px;
+  background: transparent;
+}
+
+.date-field input:focus {
+  outline: none;
+}
+
+.date-field:focus-within {
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .register>p {

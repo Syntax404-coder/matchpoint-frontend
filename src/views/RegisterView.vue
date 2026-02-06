@@ -25,6 +25,7 @@
       </select>
 
       <select v-model="form.country" required>
+        <option value="" disabled hidden>Country</option>
         <option value="Philippines">Philippines</option>
       </select>
       <select v-model="form.province" required @change="onProvinceChange">
@@ -73,7 +74,7 @@ const form = ref({
   firstName: '',
   lastName: '',
   email: '',
-  country: 'Philippines',
+  country: '',
   password: '',
   birthdate: '',
   gender: '',

@@ -1,99 +1,221 @@
 <template>
-  <div class="min-h-screen flex flex-col items-center justify-center p-6 relative z-10 py-12">
-    <!-- Card -->
-    <GlassCard class="w-full max-w-2xl">
-      <h1 class="text-3xl font-bold text-white text-center mb-2 tracking-wide">Create Account</h1>
-      <p class="text-gray-400 text-center mb-8">Join MatchPoint today</p>
-
-      <form @submit.prevent="handleRegister" class="space-y-6">
-        
-        <!-- Name Fields -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <GlassInput v-model="form.firstName" label="First Name" placeholder="First Name" required />
-          <GlassInput v-model="form.lastName" label="Last Name" placeholder="Last Name" required />
-        </div>
-
-        <GlassInput v-model="form.email" label="Email" type="email" placeholder="Email Address" required />
-
-        <!-- Password Fields -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <GlassInput v-model="form.password" label="Password" type="password" placeholder="Password" required />
-          <GlassInput v-model="form.confirmPassword" label="Confirm Password" type="password" placeholder="Confirm Password" required :class="{'ring-2 ring-red-500/50': passwordMismatch}" />
-        </div>
-        <p v-if="passwordMismatch" class="text-red-400 text-xs mt-1">Passwords do not match</p>
-
-        <!-- Birthdate & Gender -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <GlassInput v-model="form.birthdate" label="Birthdate" type="date" required />
-          <GlassSelect v-model="form.gender" label="Gender" required>
-            <option value="" disabled class="text-gray-500">Select Gender</option>
-            <option value="Male" class="text-black">Male</option>
-            <option value="Female" class="text-black">Female</option>
-            <option value="Other" class="text-black">Other</option>
-          </GlassSelect>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <GlassSelect v-model="form.genderInterest" label="Interested in" required>
-            <option value="" disabled>Interested in</option>
-            <option value="Male" class="text-black">Male</option>
-            <option value="Female" class="text-black">Female</option>
-            <option value="Both" class="text-black">Both</option>
-          </GlassSelect>
-          <GlassSelect v-model="form.sexualOrientation" label="Sexual Orientation" required>
-            <option value="" disabled>Sexual Orientation</option>
-            <option value="Straight" class="text-black">Straight</option>
-            <option value="Bisexual" class="text-black">Bisexual</option>
-            <option value="Gay" class="text-black">Gay</option>
-            <option value="Other" class="text-black">Other</option>
-          </GlassSelect>
-        </div>
-
-        <!-- Location -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <GlassSelect v-model="form.country" label="Country" required>
-            <option value="" disabled>Country</option>
-            <option value="Philippines" class="text-black">Philippines</option>
-          </GlassSelect>
-          <GlassSelect v-model="form.province" label="Province" required @change="onProvinceChange">
-            <option value="" disabled>Select Province</option>
-            <option v-for="prov in provinces" :key="prov" :value="prov" class="text-black">{{ prov }}</option>
-          </GlassSelect>
-          <GlassSelect v-model="form.city" label="City" required :disabled="!form.province">
-            <option value="" disabled>City / Municipality</option>
-            <option v-for="city in availableCities" :key="city" :value="city" class="text-black">{{ city }}</option>
-          </GlassSelect>
-        </div>
-
-        <!-- Contact & School -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <GlassInput v-model="form.mobile" label="Mobile Number" type="tel" placeholder="+63 900 000 0000" required />
-          <GlassInput v-model="form.school" label="School" placeholder="School (optional)" />
-        </div>
-
-        <GlassTextarea v-model="form.bio" label="Bio" placeholder="Tell us about yourself..." />
-
-        <!-- Submit -->
-        <GlassButton type="submit" :disabled="loading" variant="primary">
-          <Loader2 v-if="loading" class="w-5 h-5 animate-spin" />
-          <span v-else>Create Account</span>
-        </GlassButton>
-
-        <!-- Error -->
-        <div v-if="error" class="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-xl text-sm flex items-start gap-2">
-          <AlertCircle class="w-5 h-5 flex-shrink-0 mt-0.5" />
-          <span>{{ error }}</span>
-        </div>
-      </form>
-
-      <!-- Login Link -->
-      <div class="mt-8 text-center text-gray-400 text-sm">
-        Already have an account? 
-        <router-link to="/login" class="text-white font-semibold hover:text-cyan-400 transition-colors">
-          Log in
-        </router-link>
+  <div class="flex h-screen w-full overflow-hidden">
+    <!-- Left Column: Gradient Background with Logo -->
+    <div class="hidden md:flex md:w-3/5 lg:w-2/3 relative bg-gradient-to-br from-gray-900 via-blue-900 to-black">
+      <!-- Logo - Top Left -->
+      <div class="absolute top-8 left-12 flex items-center gap-3">
+        <img src="/icon.png" alt="MatchPoint" class="w-12 h-12 object-contain drop-shadow-lg" />
+        <span class="text-2xl font-bold text-white tracking-wide">MatchPoint</span>
       </div>
-    </GlassCard>
+      
+      <!-- Decorative elements -->
+      <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl"></div>
+      </div>
+    </div>
+
+    <!-- Right Column: Form Side -->
+    <div class="w-full md:w-2/5 lg:w-1/3 bg-black/80 backdrop-blur-3xl flex flex-col justify-center items-center px-6 py-8 overflow-y-auto">
+      
+      <!-- Mobile Logo -->
+      <div class="md:hidden flex items-center gap-3 mb-6 flex-shrink-0">
+        <img src="/icon.png" alt="MatchPoint" class="w-10 h-10 object-contain" />
+        <span class="text-xl font-bold text-white">MatchPoint</span>
+      </div>
+
+      <!-- Card 1: Main Form -->
+      <div class="w-full max-w-sm bg-white/5 border border-white/10 rounded-xl p-6 mb-4 shadow-lg flex-shrink-0">
+        <h1 class="text-xl font-bold text-white text-center mb-1">Create Account</h1>
+        <p class="text-gray-400 text-center text-sm mb-5">Join MatchPoint today</p>
+
+        <form @submit.prevent="handleRegister" class="space-y-3">
+          <!-- Name Fields -->
+          <div class="grid grid-cols-2 gap-3">
+            <input 
+              v-model="form.firstName" 
+              type="text" 
+              placeholder="First Name" 
+              required
+              class="w-full bg-gray-900 text-white border border-gray-700 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors placeholder-gray-500"
+            />
+            <input 
+              v-model="form.lastName" 
+              type="text" 
+              placeholder="Last Name" 
+              required
+              class="w-full bg-gray-900 text-white border border-gray-700 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors placeholder-gray-500"
+            />
+          </div>
+
+          <!-- Email -->
+          <input 
+            v-model="form.email" 
+            type="email" 
+            placeholder="Email" 
+            required
+            class="w-full bg-gray-900 text-white border border-gray-700 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors placeholder-gray-500"
+          />
+
+          <!-- Password Fields -->
+          <div class="grid grid-cols-2 gap-3">
+            <div class="relative">
+              <input 
+                v-model="form.password" 
+                :type="showPassword ? 'text' : 'password'" 
+                placeholder="Password" 
+                required
+                class="w-full bg-gray-900 text-white border border-gray-700 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors placeholder-gray-500 pr-10"
+              />
+              <button 
+                type="button" 
+                @click="showPassword = !showPassword"
+                class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+              >
+                <Eye v-if="!showPassword" class="w-4 h-4" />
+                <EyeOff v-else class="w-4 h-4" />
+              </button>
+            </div>
+            <input 
+              v-model="form.confirmPassword" 
+              type="password" 
+              placeholder="Confirm" 
+              required
+              class="w-full bg-gray-900 text-white border border-gray-700 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors placeholder-gray-500"
+              :class="{'border-red-500': passwordMismatch}"
+            />
+          </div>
+          <p v-if="passwordMismatch" class="text-red-400 text-xs">Passwords do not match</p>
+
+          <!-- Birthdate & Gender -->
+          <div class="grid grid-cols-2 gap-3">
+            <input 
+              v-model="form.birthdate" 
+              type="date" 
+              required
+              class="w-full bg-gray-900 text-white border border-gray-700 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+            />
+            <select 
+              v-model="form.gender" 
+              required
+              class="w-full bg-gray-900 text-white border border-gray-700 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+            >
+              <option value="" disabled class="text-gray-500">Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <!-- Gender Interest & Sexual Orientation -->
+          <div class="grid grid-cols-2 gap-3">
+            <select 
+              v-model="form.genderInterest" 
+              required
+              class="w-full bg-gray-900 text-white border border-gray-700 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+            >
+              <option value="" disabled>Interested in</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Both">Both</option>
+            </select>
+            <select 
+              v-model="form.sexualOrientation" 
+              required
+              class="w-full bg-gray-900 text-white border border-gray-700 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+            >
+              <option value="" disabled>Orientation</option>
+              <option value="Straight">Straight</option>
+              <option value="Bisexual">Bisexual</option>
+              <option value="Gay">Gay</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <!-- Location: Country, Province, City -->
+          <select 
+            v-model="form.country" 
+            required
+            class="w-full bg-gray-900 text-white border border-gray-700 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+          >
+            <option value="" disabled>Country</option>
+            <option value="Philippines">Philippines</option>
+          </select>
+
+          <div class="grid grid-cols-2 gap-3">
+            <select 
+              v-model="form.province" 
+              required
+              @change="onProvinceChange"
+              class="w-full bg-gray-900 text-white border border-gray-700 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+            >
+              <option value="" disabled>Province</option>
+              <option v-for="prov in provinces" :key="prov" :value="prov">{{ prov }}</option>
+            </select>
+            <select 
+              v-model="form.city" 
+              required
+              :disabled="!form.province"
+              class="w-full bg-gray-900 text-white border border-gray-700 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors disabled:opacity-50"
+            >
+              <option value="" disabled>City</option>
+              <option v-for="city in availableCities" :key="city" :value="city">{{ city }}</option>
+            </select>
+          </div>
+
+          <!-- Mobile & School -->
+          <div class="grid grid-cols-2 gap-3">
+            <input 
+              v-model="form.mobile" 
+              type="tel" 
+              placeholder="Mobile" 
+              required
+              class="w-full bg-gray-900 text-white border border-gray-700 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors placeholder-gray-500"
+            />
+            <input 
+              v-model="form.school" 
+              type="text" 
+              placeholder="School (optional)"
+              class="w-full bg-gray-900 text-white border border-gray-700 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors placeholder-gray-500"
+            />
+          </div>
+
+          <!-- Bio -->
+          <textarea 
+            v-model="form.bio" 
+            placeholder="Bio (optional)" 
+            rows="2"
+            class="w-full bg-gray-900 text-white border border-gray-700 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors placeholder-gray-500 resize-none"
+          ></textarea>
+
+          <!-- Create Account Button -->
+          <button 
+            type="submit" 
+            :disabled="loading"
+            class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold py-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            <Loader2 v-if="loading" class="w-5 h-5 animate-spin" />
+            <span v-else>Create Account</span>
+          </button>
+
+          <!-- Error Message -->
+          <div v-if="error" class="bg-red-500/10 border border-red-500/20 text-red-300 text-sm px-4 py-3 rounded-lg flex items-start gap-2">
+            <AlertCircle class="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <span>{{ error }}</span>
+          </div>
+        </form>
+      </div>
+
+      <!-- Card 2: Login Link -->
+      <div class="w-full max-w-sm bg-white/5 border border-white/10 rounded-xl p-5 text-center shadow-lg flex-shrink-0">
+        <p class="text-gray-400 text-sm">
+          Already have an account? 
+          <router-link to="/login" class="text-cyan-400 font-semibold hover:underline">
+            Log in
+          </router-link>
+        </p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -103,12 +225,7 @@ import { useRouter } from 'vue-router'
 import { useMutation } from '@vue/apollo-composable'
 import { gql } from '@apollo/client/core'
 import { philippines as provinceCities } from '../data/philippines'
-import { Loader2, AlertCircle } from 'lucide-vue-next'
-import GlassCard from '../components/ui/GlassCard.vue'
-import GlassInput from '../components/ui/GlassInput.vue'
-import GlassSelect from '../components/ui/GlassSelect.vue'
-import GlassTextarea from '../components/ui/GlassTextarea.vue'
-import GlassButton from '../components/ui/GlassButton.vue'
+import { Eye, EyeOff, Loader2, AlertCircle } from 'lucide-vue-next'
 
 const router = useRouter()
 
@@ -116,20 +233,21 @@ const form = ref({
   firstName: '',
   lastName: '',
   email: '',
-  country: '',
   password: '',
+  confirmPassword: '',
   birthdate: '',
   gender: '',
   genderInterest: '',
+  sexualOrientation: '',
+  country: '',
   province: '',
   city: '',
-  bio: '',
-  mobile: '',               
-  school: '',               
-  sexualOrientation: '',
-  confirmPassword: ''     
+  mobile: '',
+  school: '',
+  bio: ''
 })
 
+const showPassword = ref(false)
 const error = ref(null)
 
 const REGISTER_USER = gql`
@@ -173,7 +291,7 @@ const calculateAge = (birthdate) => {
 const handleRegister = async () => {
   error.value = null
 
-  // Age validation - must be 18 or older
+  // Age validation
   if (form.value.birthdate) {
     const age = calculateAge(form.value.birthdate)
     if (age < 18) {
@@ -182,12 +300,13 @@ const handleRegister = async () => {
     }
   }
 
-  // Password match validation
+  // Password match
   if (form.value.password !== form.value.confirmPassword) {
     error.value = "Passwords do not match"
     return
   }
 
+  // Mobile validation
   if (!/^\+?\d{10,15}$/.test(form.value.mobile)) {
     error.value = "Mobile number must be 10-15 digits"
     return
@@ -207,9 +326,9 @@ const handleRegister = async () => {
         province: form.value.province,
         city: form.value.city,
         bio: form.value.bio,
-        mobile: form.value.mobile,                     
-        school: form.value.school,                     
-        sexualOrientation: form.value.sexualOrientation 
+        mobile: form.value.mobile,
+        school: form.value.school,
+        sexualOrientation: form.value.sexualOrientation
       }
     })
 

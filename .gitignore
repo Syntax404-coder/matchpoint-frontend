@@ -33,4 +33,6 @@ coverage
 /cypress/screenshots/
 
 # Vitest
-__screenshots__/
+
+# API Check
+api_check/

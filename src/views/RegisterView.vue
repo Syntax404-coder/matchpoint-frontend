@@ -1,68 +1,99 @@
 <template>
-  <div class="register">
-    <h1>Create Account</h1>
+  <div class="min-h-screen flex flex-col items-center justify-center p-6 relative z-10 py-12">
+    <!-- Card -->
+    <GlassCard class="w-full max-w-2xl">
+      <h1 class="text-3xl font-bold text-white text-center mb-2 tracking-wide">Create Account</h1>
+      <p class="text-gray-400 text-center mb-8">Join MatchPoint today</p>
 
-    <form @submit.prevent="handleRegister">
-      <input v-model="form.firstName" placeholder="First Name" required />
-      <input v-model="form.lastName" placeholder="Last Name" required />
-      <input v-model="form.email" type="email" placeholder="Email" required />
-      <input v-model="form.password" type="password" placeholder="Password" required />
-      <input v-model="form.confirmPassword" type="password" placeholder="Confirm Password" required :class="{ 'input-error': passwordMismatch }" />
-      <p v-if="passwordMismatch" class="field-error">Passwords do not match</p>
+      <form @submit.prevent="handleRegister" class="space-y-6">
+        
+        <!-- Name Fields -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <GlassInput v-model="form.firstName" label="First Name" placeholder="First Name" required />
+          <GlassInput v-model="form.lastName" label="Last Name" placeholder="Last Name" required />
+        </div>
 
-      <div class="date-field">
-        <label>Birthdate</label>
-        <input v-model="form.birthdate" type="date" required />
+        <GlassInput v-model="form.email" label="Email" type="email" placeholder="Email Address" required />
+
+        <!-- Password Fields -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <GlassInput v-model="form.password" label="Password" type="password" placeholder="Password" required />
+          <GlassInput v-model="form.confirmPassword" label="Confirm Password" type="password" placeholder="Confirm Password" required :class="{'ring-2 ring-red-500/50': passwordMismatch}" />
+        </div>
+        <p v-if="passwordMismatch" class="text-red-400 text-xs mt-1">Passwords do not match</p>
+
+        <!-- Birthdate & Gender -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <GlassInput v-model="form.birthdate" label="Birthdate" type="date" required />
+          <GlassSelect v-model="form.gender" label="Gender" required>
+            <option value="" disabled class="text-gray-500">Select Gender</option>
+            <option value="Male" class="text-black">Male</option>
+            <option value="Female" class="text-black">Female</option>
+            <option value="Other" class="text-black">Other</option>
+          </GlassSelect>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <GlassSelect v-model="form.genderInterest" label="Interested in" required>
+            <option value="" disabled>Interested in</option>
+            <option value="Male" class="text-black">Male</option>
+            <option value="Female" class="text-black">Female</option>
+            <option value="Both" class="text-black">Both</option>
+          </GlassSelect>
+          <GlassSelect v-model="form.sexualOrientation" label="Sexual Orientation" required>
+            <option value="" disabled>Sexual Orientation</option>
+            <option value="Straight" class="text-black">Straight</option>
+            <option value="Bisexual" class="text-black">Bisexual</option>
+            <option value="Gay" class="text-black">Gay</option>
+            <option value="Other" class="text-black">Other</option>
+          </GlassSelect>
+        </div>
+
+        <!-- Location -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <GlassSelect v-model="form.country" label="Country" required>
+            <option value="" disabled>Country</option>
+            <option value="Philippines" class="text-black">Philippines</option>
+          </GlassSelect>
+          <GlassSelect v-model="form.province" label="Province" required @change="onProvinceChange">
+            <option value="" disabled>Select Province</option>
+            <option v-for="prov in provinces" :key="prov" :value="prov" class="text-black">{{ prov }}</option>
+          </GlassSelect>
+          <GlassSelect v-model="form.city" label="City" required :disabled="!form.province">
+            <option value="" disabled>City / Municipality</option>
+            <option v-for="city in availableCities" :key="city" :value="city" class="text-black">{{ city }}</option>
+          </GlassSelect>
+        </div>
+
+        <!-- Contact & School -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <GlassInput v-model="form.mobile" label="Mobile Number" type="tel" placeholder="+63 900 000 0000" required />
+          <GlassInput v-model="form.school" label="School" placeholder="School (optional)" />
+        </div>
+
+        <GlassTextarea v-model="form.bio" label="Bio" placeholder="Tell us about yourself..." />
+
+        <!-- Submit -->
+        <GlassButton type="submit" :disabled="loading" variant="primary">
+          <Loader2 v-if="loading" class="w-5 h-5 animate-spin" />
+          <span v-else>Create Account</span>
+        </GlassButton>
+
+        <!-- Error -->
+        <div v-if="error" class="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-xl text-sm flex items-start gap-2">
+          <AlertCircle class="w-5 h-5 flex-shrink-0 mt-0.5" />
+          <span>{{ error }}</span>
+        </div>
+      </form>
+
+      <!-- Login Link -->
+      <div class="mt-8 text-center text-gray-400 text-sm">
+        Already have an account? 
+        <router-link to="/login" class="text-white font-semibold hover:text-cyan-400 transition-colors">
+          Log in
+        </router-link>
       </div>
-
-      <select v-model="form.gender" required>
-        <option value="" disabled hidden>Select Gender</option>
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
-        <option value="Other">Other</option>
-      </select>
-
-      <select v-model="form.genderInterest" required>
-        <option value="" disabled hidden>Interested in</option>
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
-        <option value="Both">Both</option>
-      </select>
-
-      <select v-model="form.country" required>
-        <option value="" disabled hidden>Country</option>
-        <option value="Philippines">Philippines</option>
-      </select>
-      <select v-model="form.province" required @change="onProvinceChange">
-        <option value="" disabled hidden>Select Province</option>
-        <option v-for="prov in provinces" :key="prov" :value="prov">{{ prov }}</option>
-      </select>
-
-      <select v-model="form.city" required :disabled="!form.province">
-        <option value="" disabled hidden>City / Municipality</option>
-        <option v-for="city in availableCities" :key="city" :value="city">{{ city }}</option>
-      </select>
-      <input v-model="form.mobile" type="tel" placeholder="Mobile Number" required />
-
-      <input v-model="form.school" placeholder="School (optional)" />
-
-      <select v-model="form.sexualOrientation" required>
-        <option value="" disabled hidden>Sexual Orientation</option>
-        <option value="Straight">Straight</option>
-        <option value="Bisexual">Bisexual</option>
-        <option value="Gay">Gay</option>
-        <option value="Other">Other</option>
-      </select>
-      <textarea v-model="form.bio" placeholder="Bio (optional)"></textarea>
-
-      <button type="submit" :disabled="loading">
-        {{ loading ? 'Creating...' : 'Register' }}
-      </button>
-
-      <p v-if="error" class="error">{{ error }}</p>
-    </form>
-
-    <p>Already have an account? <router-link to="/login">Login</router-link></p>
+    </GlassCard>
   </div>
 </template>
 
@@ -72,6 +103,12 @@ import { useRouter } from 'vue-router'
 import { useMutation } from '@vue/apollo-composable'
 import { gql } from '@apollo/client/core'
 import { philippines as provinceCities } from '../data/philippines'
+import { Loader2, AlertCircle } from 'lucide-vue-next'
+import GlassCard from '../components/ui/GlassCard.vue'
+import GlassInput from '../components/ui/GlassInput.vue'
+import GlassSelect from '../components/ui/GlassSelect.vue'
+import GlassTextarea from '../components/ui/GlassTextarea.vue'
+import GlassButton from '../components/ui/GlassButton.vue'
 
 const router = useRouter()
 
@@ -107,9 +144,6 @@ const REGISTER_USER = gql`
 
 const { mutate: registerUser, loading } = useMutation(REGISTER_USER)
 
-// Province to Cities mapping
-// Province to Cities mapping imported from data/philippines.js
-
 const provinces = Object.keys(provinceCities)
 
 const availableCities = computed(() => {
@@ -121,12 +155,10 @@ const onProvinceChange = () => {
   form.value.city = ''
 }
 
-// Real-time password match validation
 const passwordMismatch = computed(() => {
   return form.value.confirmPassword.length > 0 && form.value.password !== form.value.confirmPassword
 })
 
-// Calculate age from birthdate
 const calculateAge = (birthdate) => {
   const today = new Date()
   const birth = new Date(birthdate)
@@ -172,7 +204,8 @@ const handleRegister = async () => {
         gender: form.value.gender,
         genderInterest: form.value.genderInterest,
         country: form.value.country,
-        city: `${form.value.city}, ${form.value.province}`,
+        province: form.value.province,
+        city: form.value.city,
         bio: form.value.bio,
         mobile: form.value.mobile,                     
         school: form.value.school,                     
@@ -184,212 +217,10 @@ const handleRegister = async () => {
       error.value = data.registerUser.errors.join(', ')
     } else {
       localStorage.setItem('token', data.registerUser.token)
-      if (data.registerUser.errors.length) {
-        error.value = data.registerUser.errors.join(', ')
-      } else {
-        localStorage.setItem('token', data.registerUser.token)
-        router.push('/upload-photos')  // ← Changed from '/deck'
-      }
+      router.push('/upload-photos')
     }
   } catch (e) {
     error.value = e.message
   }
 }
 </script>
-
-<style scoped>
-.register {
-  max-width: 480px;
-  margin: 60px auto;
-  padding: 40px;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-}
-
-h1 {
-  margin: 0 0 32px 0;
-  font-size: 32px;
-  font-weight: 700;
-  color: #3B82F6;
-  text-align: center;
-  letter-spacing: -0.5px;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-input,
-select,
-textarea {
-  padding: 14px 16px;
-  font-size: 16px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  background: #fafafa;
-  color: #1a1a1a;
-  transition: all 0.2s ease;
-  font-family: inherit;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  outline: none;
-  border-color: #3B82F6;
-  background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-input::placeholder,
-textarea::placeholder {
-  color: #9e9e9e;
-}
-
-select {
-  padding: 14px 44px 14px 16px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  background-color: #fafafa;
-  background-size: 10px 6px;
-  cursor: pointer;
-}
-
-textarea {
-  resize: vertical;
-  min-height: 80px;
-  font-family: inherit;
-}
-
-button {
-  padding: 14px 24px;
-  background: #3B82F6;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  margin-top: 8px;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-}
-
-button:hover:not(:disabled) {
-  background: #2563EB;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-  transform: translateY(-1px);
-}
-
-button:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
-}
-
-button:disabled {
-  background: #e0e0e0;
-  color: #9e9e9e;
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
-}
-
-.error {
-  color: #EF4444;
-  background: #FEF2F2;
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  margin: 0;
-  border-left: 4px solid #EF4444;
-}
-
-.input-error {
-  border-color: #EF4444 !important;
-  background: #FEF2F2 !important;
-}
-
-.input-error:focus {
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
-}
-
-.field-error {
-  color: #EF4444;
-  font-size: 13px;
-  margin: -8px 0 0 0;
-  padding: 0;
-}
-
-.date-field {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  background: white;
-}
-
-.date-field label {
-  color: #757575;
-  font-size: 15px;
-  white-space: nowrap;
-}
-
-.date-field input {
-  flex: 1;
-  border: none;
-  padding: 0;
-  font-size: 15px;
-  background: transparent;
-}
-
-.date-field input:focus {
-  outline: none;
-}
-
-.date-field:focus-within {
-  border-color: #3B82F6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.register>p {
-  margin-top: 24px;
-  text-align: center;
-  color: #666;
-  font-size: 14px;
-}
-
-.register>p a {
-  color: #3B82F6;
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.2s ease;
-}
-
-.register>p a:hover {
-  color: #2563EB;
-  text-decoration: underline;
-}
-
-@media (max-width: 480px) {
-  .register {
-    margin: 20px;
-    padding: 32px 24px;
-    border-radius: 12px;
-  }
-
-  h1 {
-    font-size: 28px;
-    margin-bottom: 24px;
-  }
-
-  form {
-    gap: 14px;
-  }
-}
-</style>

@@ -1,44 +1,77 @@
 <template>
-  <div class="matches">
-    <div class="header">
-      <router-link to="/deck">← Back to Deck</router-link>
-      <h1>Messages</h1>
+  <div class="min-h-screen flex flex-col p-4 relative z-10 max-w-2xl mx-auto">
+    <!-- Header -->
+    <div class="flex items-center gap-4 mb-6">
+      <router-link to="/deck" class="p-3 bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-white hover:bg-white/20 transition-all shadow-lg group">
+        <ArrowLeft class="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+      </router-link>
+      <h1 class="text-3xl font-bold text-white tracking-wide">Messages</h1>
     </div>
     
-    <div v-if="loading">Loading...</div>
-    
-    <div v-else-if="inbox.length === 0" class="empty">
-      <p>No matches yet. Keep swiping!</p>
+    <!-- Loading -->
+    <div v-if="loading" class="flex-1 flex items-center justify-center text-white/50 animate-pulse">
+      <Loader2 class="w-8 h-8 animate-spin" />
     </div>
     
-    <div v-else class="inbox-list">
+    <!-- Empty State -->
+    <div v-else-if="inbox.length === 0" class="flex-1 flex flex-col items-center justify-center text-center p-8 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-md">
+      <div class="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-4">
+        <MessageCircle class="w-10 h-10 text-white/20" />
+      </div>
+      <h2 class="text-xl font-bold text-white mb-2">No matches yet</h2>
+      <p class="text-gray-400">Keep swiping to find your match!</p>
+      <router-link to="/deck" class="mt-6 px-6 py-3 bg-white/10 border border-white/10 rounded-xl text-white font-medium hover:bg-white/20 transition-colors">
+        Go to Deck
+      </router-link>
+    </div>
+    
+    <!-- Match List -->
+    <div v-else class="space-y-3">
       <div 
         v-for="item in inbox" 
         :key="item.match.id"
-        class="inbox-item"
+        class="group flex items-center gap-4 p-4 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl cursor-pointer hover:bg-white/10 transition-all hover:scale-[1.02] shadow-lg relative"
         @click="openChat(item.match.id, item.otherUser)"
       >
-        <img :src="item.otherUser.primaryPhotoUrl || (item.otherUser.gender === 'Female' ? '/girl.png' : '/boy.png')" />
-        
-        <div class="info">
-          <h3>{{ item.otherUser.firstName }} {{ item.otherUser.lastName }}</h3>
-          <p>{{ item.latestMessage?.content || 'Say hi!' }}</p>
+        <!-- Avatar -->
+        <div class="relative">
+          <img 
+            :src="item.otherUser.primaryPhotoUrl || (item.otherUser.gender === 'Female' ? '/girl.png' : '/boy.png')" 
+            class="w-16 h-16 rounded-full object-cover border-2 border-white/20 group-hover:border-cyan-500 transition-colors bg-black/20"
+          />
+          <div v-if="item.unreadCount > 0" class="absolute -top-1 -right-1 min-w-[20px] h-5 bg-red-500 text-white text-xs font-bold flex items-center justify-center rounded-full px-1.5 shadow-md border border-black/20">
+            {{ item.unreadCount }}
+          </div>
         </div>
         
-        <span v-if="item.unreadCount > 0" class="unread">{{ item.unreadCount }}</span>
+        <!-- Info -->
+        <div class="flex-1 min-w-0">
+          <div class="flex justify-between items-baseline mb-1">
+            <h3 class="text-lg font-bold text-white truncate pr-2">{{ item.otherUser.firstName }} {{ item.otherUser.lastName }}</h3>
+            <span v-if="item.latestMessage" class="text-xs text-gray-500 flex-shrink-0">
+              {{ formatTime(item.latestMessage.createdAt) }}
+            </span>
+          </div>
+          <p class="text-gray-400 text-sm truncate group-hover:text-gray-300 transition-colors" :class="{'font-semibold text-white': item.unreadCount > 0}">
+            {{ item.latestMessage?.content || 'Say hi! 👋' }}
+          </p>
+        </div>
+
+        <!-- Chevron -->
+        <ChevronRight class="w-5 h-5 text-gray-600 group-hover:text-cyan-400 transition-colors group-hover:translate-x-1 transform" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, watchEffect } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useQuery } from '@vue/apollo-composable'
 import { gql } from '@apollo/client/core'
+import { ArrowLeft, Loader2, MessageCircle, ChevronRight } from 'lucide-vue-next'
 
 const router = useRouter()
-const route = useRoute()
 
 /* ---------------- GRAPHQL ---------------- */
 const MY_INBOX = gql`
@@ -52,8 +85,8 @@ const MY_INBOX = gql`
   }
 `
 
-const { result, loading, refetch } = useQuery(MY_INBOX, null, {
-  fetchPolicy: 'network-only'  // ← Always fetch from server, not cache
+const { result, loading } = useQuery(MY_INBOX, null, {
+  fetchPolicy: 'network-only'
 })
 const inbox = computed(() => result.value?.myInbox || [])
 
@@ -66,156 +99,17 @@ const openChat = (matchId, otherUser) => {
   })
 }
 
-/* ---------------- REFRESH ON ROUTE ENTER ---------------- */
-// watchEffect(() => {
-//   // Whenever route changes, refetch inbox
-//   refetch()
-// })
-
-// onMounted(() => {
-//   refetch()
-// })
+const formatTime = (timestamp) => {
+  const date = new Date(timestamp)
+  const now = new Date()
+  const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24))
+  
+  if (diffDays === 0) {
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+  } else if (diffDays < 7) {
+    return date.toLocaleDateString('en-US', { weekday: 'short' })
+  } else {
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  }
+}
 </script>
-
-
-<style scoped>
-  .matches {
-  max-width: 600px;
-  margin: 20px auto;
-  padding: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.header a {
-  text-decoration: none;
-  color: #3B82F6;
-  font-weight: 600;
-  transition: color 0.2s ease;
-}
-
-.header a:hover {
-  color: #2563EB;
-}
-
-.header h1 {
-  font-size: 32px;
-  font-weight: 700;
-  color: #3B82F6;
-  text-align: right;
-  margin: 0;
-  flex: 1;
-}
-
-.empty {
-  text-align: center;
-  padding: 50px;
-  font-size: 16px;
-  color: #666;
-}
-
-.inbox-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* INBOX ITEM */
-.inbox-item {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 12px 16px;
-  border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-}
-
-.inbox-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-}
-
-.inbox-item img {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-  border: 2px solid #3B82F6;
-}
-
-.info {
-  flex: 1;
-  text-align: left;
-  min-width: 0 /* crucial for text-overflow */
-}
-
-.info h3 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #222;
-}
-
-.info p {
-  margin: 4px 0 0;
-  font-size: 14px;
-  color: #666;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.unread {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: #EF4444;
-  color: white;
-  padding: 4px 10px;
-  border-radius: 50%;
-  font-size: 12px;
-  font-weight: 600;
-  min-width: 20px;
-  text-align: center;
-}
-
-/* RESPONSIVE */
-@media (max-width: 480px) {
-  .matches {
-    padding: 16px;
-  }
-
-  .header h1 {
-    font-size: 28px;
-  }
-
-  .inbox-item img {
-    width: 50px;
-    height: 50px;
-  }
-
-  .info h3 {
-    font-size: 14px;
-  }
-
-  .info p {
-    font-size: 12px;
-  }
-
-  .unread {
-    font-size: 10px;
-    padding: 3px 8px;
-  }
-}
-</style>

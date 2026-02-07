@@ -1,38 +1,67 @@
 <template>
-  <div class="login">
+  <div class="min-h-screen flex flex-col items-center justify-center p-6 relative z-10">
     <!-- Logo -->
-    <img src="/icon.png" alt="MatchPoint Logo" class="logo" />
-    <h1>Login</h1>
+    <div class="mb-8 p-4 bg-white/5 rounded-full backdrop-blur-md border border-white/10 shadow-lg animate-pulse">
+      <img src="/icon.png" alt="MatchPoint Logo" class="w-20 h-20 object-contain drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+    </div>
 
-    <!-- Form -->
-    <form @submit.prevent="handleLogin">
-      <!-- Email input -->
-      <input v-model="email" type="email" placeholder="Email" required />
+    <!-- Card -->
+    <GlassCard class="w-full max-w-md">
+      <h1 class="text-3xl font-bold text-white text-center mb-2 tracking-wide">Welcome Back</h1>
+      <p class="text-gray-400 text-center mb-8">Sign in to continue to MatchPoint</p>
 
-      <!-- Password input with Lucide eye toggle -->
-      <div class="password-wrapper">
-        <input
-          v-model="password"
-          :type="showPassword ? 'text' : 'password'"
-          placeholder="Password"
+      <form @submit.prevent="handleLogin" class="space-y-6">
+        <!-- Email -->
+        <GlassInput
+          v-model="email"
+          label="Email"
+          id="email"
+          type="email"
+          placeholder="Enter your email"
           required
-        />
-        <span class="eye-icon" @click="showPassword = !showPassword">
-          <component :is="showPassword ? Eye : EyeOff" size="18" />
-        </span>
+        >
+          <template #icon>
+            <MailIcon class="w-5 h-5" />
+          </template>
+        </GlassInput>
+
+        <!-- Password -->
+        <GlassInput
+          v-model="password"
+          label="Password"
+          id="password"
+          :type="showPassword ? 'text' : 'password'"
+          placeholder="Enter your password"
+          required
+        >
+          <template #icon>
+            <button type="button" @click="showPassword = !showPassword" class="focus:outline-none hover:text-white transition-colors cursor-pointer">
+              <component :is="showPassword ? Eye : EyeOff" class="w-5 h-5" />
+            </button>
+          </template>
+        </GlassInput>
+
+        <!-- Submit -->
+        <GlassButton type="submit" :disabled="loading" variant="primary">
+          <Loader2 v-if="loading" class="w-5 h-5 animate-spin" />
+          <span v-else>Sign In</span>
+        </GlassButton>
+
+        <!-- Error -->
+        <div v-if="error" class="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-xl text-sm flex items-start gap-2">
+          <AlertCircle class="w-5 h-5 flex-shrink-0 mt-0.5" />
+          <span>{{ error }}</span>
+        </div>
+      </form>
+
+      <!-- Register Link -->
+      <div class="mt-8 text-center text-gray-400 text-sm">
+        Don't have an account? 
+        <router-link to="/register" class="text-white font-semibold hover:text-cyan-400 transition-colors">
+          Create an account
+        </router-link>
       </div>
-
-      <!-- Submit button -->
-      <button type="submit" :disabled="loading">
-        {{ loading ? 'Logging in...' : 'Login' }}
-      </button>
-
-      <!-- Error message -->
-      <p v-if="error" class="error">{{ error }}</p>
-    </form>
-
-    <!-- Register link -->
-    <p>Don't have an account? <router-link to="/register">Register</router-link></p>
+    </GlassCard>
   </div>
 </template>
 
@@ -41,9 +70,10 @@ import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useMutation } from '@vue/apollo-composable'
 import { gql } from '@apollo/client/core'
-
-// Lucide icons
-import { Eye, EyeOff } from 'lucide-vue-next'
+import { Eye, EyeOff, Mail as MailIcon, Loader2, AlertCircle } from 'lucide-vue-next'
+import GlassCard from '../components/ui/GlassCard.vue'
+import GlassInput from '../components/ui/GlassInput.vue'
+import GlassButton from '../components/ui/GlassButton.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -90,154 +120,3 @@ const handleLogin = async () => {
   }
 }
 </script>
-
-<style scoped>
-.login {
-  max-width: 420px;
-  margin: 60px auto;
-  padding: 40px;
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  text-align: center;
-}
-
-.logo {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto 16px;
-  display: block;
-  border-radius: 12px;
-  object-fit: contain;
-}
-
-
-
-h1 {
-  margin: 0 0 32px 0;
-  font-size: 32px;
-  font-weight: 700;
-  color: #3B82F6;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-input {
-  padding: 14px 16px;
-  font-size: 16px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  background: #fafafa;
-  color: #1a1a1a;
-  transition: all 0.2s ease;
-  font-family: inherit;
-}
-
-input:focus {
-  outline: none;
-  border-color: #3B82F6;
-  background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.password-wrapper {
-  position: relative;
-}
-
-.password-wrapper input {
-  width: 100%;
-  padding-right: 40px; /* space for icon */
-  box-sizing: border-box;
-}
-
-.eye-icon {
-  position: absolute;
-  top: 50%;
-  right: 20px;
-  transform: translateY(-50%);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-}
-
-button {
-  padding: 14px 24px;
-  background: #3B82F6;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-button:hover:not(:disabled) {
-  background: #2563EB;
-}
-
-button:disabled {
-  background: #e0e0e0;
-  color: #9e9e9e;
-  cursor: not-allowed;
-}
-
-.error {
-  color: #EF4444;
-  background: #FEF2F2;
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  margin: 0;
-  border-left: 4px solid #EF4444;
-}
-
-.login > p {
-  margin-top: 24px;
-  font-size: 14px;
-  color: #666;
-}
-
-.login > p a {
-  color: #3B82F6;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.login > p a:hover {
-  color: #2563EB;
-}
-
-@media (max-width: 480px) {
-  .login {
-    margin: 20px;
-    padding: 32px 24px;
-    border-radius: 12px;
-  }
-
-  .logo {
-    width: 64px;
-    height: 64px;
-    margin-bottom: 12px;
-  }
-
-  .app-name {
-    font-size: 32px;
-    margin-bottom: 4px;
-  }
-
-  h1 {
-    font-size: 28px;
-    margin-bottom: 24px;
-  }
-
-  form {
-    gap: 16px;
-  }
-}
-</style>

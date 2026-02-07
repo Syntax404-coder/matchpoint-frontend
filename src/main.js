@@ -3,6 +3,7 @@ import { DefaultApolloClient } from '@vue/apollo-composable'
 import { apolloClient } from './apollo'
 import App from './App.vue'
 import router from './router'
+import './assets/main.css'
 
 const app = createApp(App)
 

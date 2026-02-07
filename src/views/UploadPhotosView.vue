@@ -1,30 +1,79 @@
 <template>
-  <div class="upload-photos">
-    <img src="/icon.png" alt="MatchPoint Logo" class="logo" />
-
-    <h1>Upload Your Photos</h1>
-    <p>Upload at least 1 photo to continue (max 5)</p>
-    
-    <input type="file" accept="image/*" @change="onFileChange" />
-    <button @click="uploadPhoto" :disabled="!selectedFile || uploading">
-      {{ uploading ? 'Uploading...' : 'Upload Photo' }}
-    </button>
-    
-    <p v-if="error" class="error">{{ error }}</p>
-    
-    <div v-if="photos.length" class="gallery">
-      <h3>Your Photos ({{ photos.length }}/5)</h3>
-      <div class="photos">
-        <div v-for="photo in photos" :key="photo.id" class="photo">
-          <img :src="photo.url" />
-          <p v-if="photo.isPrimary">⭐ Primary</p>
-        </div>
+  <div class="min-h-screen flex flex-col items-center justify-center p-6 relative z-10 py-12">
+    <GlassCard class="w-full max-w-lg text-center">
+      <!-- Logo -->
+      <div class="mb-6 inline-block p-3 bg-white/5 rounded-full backdrop-blur-md border border-white/10 shadow-lg">
+        <img src="/icon.png" alt="MatchPoint Logo" class="w-16 h-16 object-contain drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
       </div>
-      
-      <button @click="goToDeck" :disabled="photos.length === 0">
-        Continue to Swipe Deck
-      </button>
-    </div>
+
+      <h1 class="text-3xl font-bold text-white mb-2 tracking-wide">Upload Photos</h1>
+      <p class="text-gray-400 mb-8">Add at least 1 photo to continue (max 5)</p>
+
+      <!-- Upload Area -->
+      <div class="mb-8">
+        <label 
+          class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/20 rounded-2xl cursor-pointer hover:border-cyan-500 hover:bg-white/5 transition-all group"
+          :class="{'border-cyan-500 bg-cyan-500/10': selectedFile}"
+        >
+          <div class="flex flex-col items-center justify-center pt-5 pb-6">
+            <UploadCloud v-if="!selectedFile" class="w-10 h-10 mb-3 text-gray-400 group-hover:text-cyan-400 transition-colors" />
+            <Image v-else class="w-10 h-10 mb-3 text-cyan-400" />
+            
+            <p v-if="!selectedFile" class="mb-2 text-sm text-gray-400 group-hover:text-gray-300">
+              <span class="font-semibold">Click to upload</span> or drag and drop
+            </p>
+            <p v-else class="text-sm text-cyan-400 font-semibold truncate max-w-[200px]">
+              {{ selectedFile.name }}
+            </p>
+          </div>
+          <input type="file" class="hidden" accept="image/*" @change="onFileChange" />
+        </label>
+      </div>
+
+      <!-- Action Button -->
+      <div class="mb-8">
+        <GlassButton 
+          @click="uploadPhoto" 
+          :disabled="!selectedFile || uploading"
+          variant="primary"
+        >
+          <Loader2 v-if="uploading" class="w-5 h-5 animate-spin" />
+          <span v-else>Upload Photo</span>
+        </GlassButton>
+        
+        <p v-if="error" class="mt-4 text-red-400 text-sm bg-red-500/10 p-3 rounded-lg border border-red-500/20 inline-block">
+          {{ error }}
+        </p>
+      </div>
+
+      <!-- Gallery -->
+      <div v-if="photos.length" class="border-t border-white/10 pt-6">
+        <h3 class="text-lg font-semibold text-white mb-4 flex items-center justify-center gap-2">
+          Your Photos <span class="bg-white/10 text-xs px-2 py-0.5 rounded-full text-gray-300">{{ photos.length }}/5</span>
+        </h3>
+        
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+          <div v-for="photo in photos" :key="photo.id" class="relative group aspect-square rounded-xl overflow-hidden border border-white/10 bg-black/40">
+            <img :src="photo.url" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+            
+            <div v-if="photo.isPrimary" class="absolute top-2 left-2 bg-gradient-to-r from-yellow-500 to-amber-500 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded shadow-lg flex items-center gap-1">
+              <Star class="w-3 h-3 fill-current" /> Primary
+            </div>
+            
+            <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors"></div>
+          </div>
+        </div>
+
+        <GlassButton 
+          @click="goToDeck" 
+          :disabled="photos.length === 0"
+          variant="secondary"
+          class="w-full"
+        >
+          Continue to Swipe Deck
+        </GlassButton>
+      </div>
+    </GlassCard>
   </div>
 </template>
 
@@ -33,6 +82,9 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMutation, useQuery } from '@vue/apollo-composable'
 import { gql } from '@apollo/client/core'
+import { UploadCloud, Image, Loader2, Star } from 'lucide-vue-next'
+import GlassCard from '../components/ui/GlassCard.vue'
+import GlassButton from '../components/ui/GlassButton.vue'
 
 const router = useRouter()
 
@@ -79,6 +131,13 @@ const onFileChange = (e) => {
   selectedFile.value = e.target.files[0] || null
 }
 
+const fileToBase64 = (file) =>
+  new Promise((resolve) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result.split(',')[1])
+    reader.readAsDataURL(file)
+  })
+
 const uploadPhoto = async () => {
   if (!selectedFile.value) return
 
@@ -99,9 +158,9 @@ const uploadPhoto = async () => {
     if (data.uploadPhoto.errors.length) {
       error.value = data.uploadPhoto.errors.join(', ')
     } else {
-      refetch()
+      await refetch()
       selectedFile.value = null
-      // Reset file input
+      // Reset file input via DOM (Vue way would be better with key or ref but this works for now)
       const fileInput = document.querySelector('input[type="file"]')
       if (fileInput) fileInput.value = ''
     }
@@ -112,202 +171,9 @@ const uploadPhoto = async () => {
   }
 }
 
-const fileToBase64 = (file) =>
-  new Promise((resolve) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result.split(',')[1])
-    reader.readAsDataURL(file)
-  })
-
 const goToDeck = () => {
   if (photos.value.length > 0) {
     router.push('/deck')
   }
 }
 </script>
-
-<style scoped>
-  .upload-photos {
-    max-width: 420px;
-    margin: 60px auto;
-    padding: 40px;
-    background: #ffffff;
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-    text-align: center;
-  }
-  
-  .logo {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 16px;
-    display: block;
-    border-radius: 12px;
-    object-fit: contain;
-  }
-  
-
-  
-  h1 {
-    margin: 0 0 24px 0;
-    font-size: 32px;
-    font-weight: 700;
-    color: #3B82F6;
-    letter-spacing: -0.5px;
-  }
-  
-  p {
-    color: #666;
-    font-size: 14px;
-    margin-bottom: 20px;
-  }
-  
-  input[type="file"] {
-    padding: 12px;
-    font-size: 16px;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
-    background: #fafafa;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    width: 100%;
-    margin-bottom: 12px;
-  }
-  
-  input[type="file"]:focus {
-    outline: none;
-    border-color: #3B82F6;
-    background: #ffffff;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-  
-  button {
-    padding: 14px 24px;
-    background: #3B82F6;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 600;
-    transition: all 0.2s ease;
-    margin: 8px 0;
-    width: 100%;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-  }
-  
-  button:hover:not(:disabled) {
-    background: #2563EB;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-    transform: translateY(-1px);
-  }
-  
-  button:active:not(:disabled) {
-    transform: translateY(0);
-    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
-  }
-  
-  button:disabled {
-    background: #e0e0e0;
-    color: #9e9e9e;
-    cursor: not-allowed;
-    box-shadow: none;
-  }
-  
-  .error {
-    color: #EF4444;
-    background: #FEF2F2;
-    padding: 12px 16px;
-    border-radius: 8px;
-    font-size: 14px;
-    margin: 12px 0;
-    border-left: 4px solid #EF4444;
-    text-align: left;
-  }
-  
-  .gallery {
-    margin-top: 30px;
-    text-align: left;
-  }
-  
-  .photos {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 12px;
-    margin: 16px 0;
-  }
-  
-  .photo {
-    border: 1px solid #ddd;
-    padding: 8px;
-    border-radius: 12px;
-    background: #fafafa;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-size: 12px;
-  }
-  
-  .photo img {
-    width: 100%;
-    height: 100px;
-    object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 4px;
-  }
-  
-  @media (max-width: 480px) {
-    .upload-photos {
-      margin: 20px;
-      padding: 32px 24px;
-      border-radius: 12px;
-    }
-  
-    .logo {
-      width: 64px;
-      height: 64px;
-    }
-  
-    .app-name {
-      font-size: 32px;
-      margin-bottom: 4px;
-    }
-  
-    h1 {
-      font-size: 28px;
-      margin-bottom: 20px;
-    }
-  
-    input[type="file"] {
-      padding: 10px;
-    }
-  
-    button {
-      padding: 12px 20px;
-      font-size: 14px;
-    }
-  }
-
-  input[type="file"] {
-  -webkit-appearance: none;
-  appearance: none;
-  padding: 12px;
-  font-size: 16px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  background: #fafafa;
-  cursor: pointer;
-  width: 100%;
-  box-sizing: border-box; /* important */
-  transition: all 0.2s ease;
-}
-
-input[type="file"]:focus {
-  outline: none;
-  border-color: #3B82F6;
-  background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-  </style>

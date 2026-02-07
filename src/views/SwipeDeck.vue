@@ -1,22 +1,30 @@
 <template>
-  <div class="deck">
-    <div class="header">
-      <div class="logo-wrapper">
-        <img src="/icon.png" alt="MatchPoint Logo" class="logo" />
+  <div class="min-h-screen flex flex-col relative overflow-hidden pb-safe">
+    <!-- Header -->
+    <header class="flex justify-between items-center px-6 py-4 z-20 sticky top-0">
+      <div class="bg-white/10 backdrop-blur-md rounded-2xl p-2 border border-white/10 shadow-lg">
+        <img src="/icon.png" alt="MatchPoint Logo" class="w-10 h-10 object-contain drop-shadow-md" />
       </div>
-      <div class="nav">
-        <router-link to="/matches">Messages</router-link>
-        <button @click="logout">Logout</button>
+      
+      <div class="flex items-center gap-3">
+        <router-link to="/matches" class="w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-white hover:bg-white/20 transition-all shadow-lg group">
+          <MessageCircle class="w-6 h-6 group-hover:scale-110 transition-transform" />
+        </router-link>
+        <button @click="logout" class="w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all shadow-lg group">
+          <LogOut class="w-5 h-5 group-hover:scale-110 transition-transform" />
+        </button>
       </div>
-    </div>
+    </header>
 
     <!-- Loading -->
-    <div v-if="loading" class="loading">Loading...</div>
+    <div v-if="loading" class="flex-1 flex items-center justify-center text-white/50 animate-pulse">
+      <Loader2 class="w-10 h-10 animate-spin" />
+    </div>
 
     <!-- Swipe Deck -->
-    <div v-else-if="deckUser" class="deck-container">
+    <div v-else-if="deckUser" class="flex-1 flex flex-col items-center justify-center w-full max-w-md mx-auto relative px-4 py-4">
       <div
-        class="card"
+        class="w-full relative aspect-[3/4] max-h-[70vh] rounded-3xl cursor-grab active:cursor-grabbing shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 select-none overflow-hidden touch-none"
         :style="cardStyle"
         @mousedown="onStart"
         @mousemove="onMove"
@@ -26,50 +34,93 @@
         @touchmove="onMove"
         @touchend="onEnd"
       >
+        <!-- Photo -->
+        <div class="absolute inset-0 bg-black/50" @click="nextPhoto">
+          <img 
+            :src="deckUser.photos[photoIndex]" 
+            class="w-full h-full object-cover pointer-events-none"
+            draggable="false"
+          />
+          
+          <!-- Gradient Overlay -->
+          <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent pointer-events-none"></div>
 
-
-        <!-- PHOTO GALLERY -->
-        <div class="photo-wrapper" @click="nextPhoto">
-          <img :src="deckUser.photos[photoIndex]" />
-
-          <!-- dots -->
-          <div class="photo-dots">
-            <span
-              v-for="(_, i) in deckUser.photos"
+          <!-- Photo Dots -->
+          <div class="absolute top-4 left-0 right-0 flex justify-center gap-2 pointer-events-none">
+            <div 
+              v-for="(_, i) in deckUser.photos" 
               :key="i"
-              :class="{ active: i === photoIndex }"
-            />
+              class="h-1 rounded-full transition-all duration-300 shadow-sm"
+              :class="i === photoIndex ? 'w-6 bg-white' : 'w-2 bg-white/40'"
+            ></div>
           </div>
         </div>
 
-        <div class="card-info">
-          <h2>{{ deckUser.firstName }}, {{ deckUser.age }}</h2>
-          <p>{{ deckUser.city }}, {{ deckUser.province }}</p>
-          <p v-if="deckUser.bio">{{ deckUser.bio }}</p>
+        <!-- Info Overlay -->
+        <div class="absolute bottom-0 inset-x-0 p-6 pointer-events-none">
+          <div class="backdrop-blur-xl bg-white/10 border border-white/10 rounded-2xl p-5 shadow-inner">
+            <h2 class="text-3xl font-bold text-white drop-shadow-md mb-1">{{ deckUser.firstName }}, {{ deckUser.age }}</h2>
+            <div class="flex items-center text-gray-200 text-sm mb-3">
+              <MapPin class="w-4 h-4 mr-1 opacity-80" />
+              {{ deckUser.city }}, {{ deckUser.province }}
+            </div>
+            
+            <p v-if="deckUser.bio" class="text-gray-300 text-sm line-clamp-3 leading-relaxed">
+              {{ deckUser.bio }}
+            </p>
+          </div>
         </div>
+      </div>
 
-        <div class="actions">
-          <button @click="swipe('dislike')" class="dislike">✕</button>
-          <button @click="swipe('like')" class="like">♥</button>
-        </div>
+      <!-- Actions -->
+      <div class="flex items-center justify-center gap-8 mt-8">
+        <button 
+          @click="swipe('dislike')" 
+          class="w-16 h-16 rounded-full flex items-center justify-center bg-black/40 border border-red-500/30 text-red-500 shadow-lg hover:bg-red-500 hover:text-white hover:border-red-500 hover:scale-110 active:scale-95 transition-all duration-300 group"
+        >
+          <X class="w-8 h-8 group-hover:rotate-90 transition-transform duration-300" />
+        </button>
+        
+        <button 
+          @click="swipe('like')" 
+          class="w-16 h-16 rounded-full flex items-center justify-center bg-gradient-to-tr from-cyan-500 to-blue-600 text-white shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_30px_rgba(6,182,212,0.6)] hover:scale-110 active:scale-95 transition-all duration-300"
+        >
+          <Heart class="w-8 h-8 fill-current animate-pulse-slow" />
+        </button>
       </div>
     </div>
 
     <!-- No more users -->
-    <div v-else class="no-more">
-      <h2>No more users</h2>
-      <p>Check back later!</p>
+    <div v-else class="flex-1 flex flex-col items-center justify-center text-center p-8">
+      <div class="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mb-6 animate-pulse">
+        <Users class="w-10 h-10 text-white/20" />
+      </div>
+      <h2 class="text-2xl font-bold text-white mb-2">No more users</h2>
+      <p class="text-gray-400">Check back later for new matches!</p>
     </div>
 
     <!-- Match Modal -->
-    <div v-if="showMatchModal" class="modal" @click="closeModal">
-      <div class="modal-content" @click.stop>
-        <h2>It is a Match</h2>
-        <p>You and {{ matchedUser?.firstName }} liked each other!</p>
-        <button @click="goToMessages" class="send-message-btn">Send Message</button>
-        <button @click="closeModal" class="keep-swiping-btn">Keep Swiping</button>
+    <transition name="modal">
+      <div v-if="showMatchModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" @click="closeModal">
+        <div class="w-full max-w-sm bg-gray-900/90 border border-white/10 rounded-3xl p-8 text-center shadow-2xl transform transition-all" @click.stop>
+          <div class="w-20 h-20 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_20px_rgba(6,182,212,0.5)]">
+            <Heart class="w-10 h-10 text-white fill-white" />
+          </div>
+          
+          <h2 class="text-3xl font-bold text-white mb-2 tracking-wide">It's a Match!</h2>
+          <p class="text-gray-400 mb-8">You and {{ matchedUser?.firstName }} liked each other!</p>
+          
+          <div class="space-y-3">
+            <button @click="goToMessages" class="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl text-white font-bold tracking-wide shadow-lg hover:shadow-cyan-500/30 transition-all hover:scale-[1.02] active:scale-[0.98]">
+              Send Message
+            </button>
+            <button @click="closeModal" class="w-full py-3.5 bg-white/10 border border-white/10 rounded-xl text-white font-medium hover:bg-white/20 transition-colors">
+              Keep Swiping
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+    </transition>
   </div>
 </template>
 
@@ -79,6 +130,7 @@ import { useRouter } from 'vue-router'
 import { useQuery, useMutation } from '@vue/apollo-composable'
 import { gql } from '@apollo/client/core'
 import { useAuth } from '@/composables/useAuth'
+import { MessageCircle, LogOut, X, Heart, MapPin, Loader2, Users } from 'lucide-vue-next'
 
 /* ---------------- ROUTER & AUTH ---------------- */
 const router = useRouter()
@@ -176,7 +228,7 @@ const cardStyle = computed(() => {
 /* ---------------- COMPUTED ---------------- */
 const users = computed(() => {
   const allUsers = result.value?.swipeDeck ?? []
-  // Filter to only show users with role "user" (exclude admin and other roles)
+  // Filter to only show users with role "user"
   return allUsers.filter(user => user.role === 'user')
 })
 
@@ -264,314 +316,14 @@ const logout = () => {
 }
 </script>
 
-
 <style scoped>
-  .deck {
-  max-width: 500px;
-  margin: 20px auto;
-  padding: 0 16px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  text-align: center;
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
 }
-
-
-
-.nav {
-  display: flex;
-  gap: 10px;
-}
-
-.nav a {
-  text-decoration: none;
-  color: #3B82F6;
-  font-weight: 600;
-  transition: color 0.2s ease;
-}
-
-.nav a:hover {
-  color: #2563EB;
-}
-
-.nav button {
-  padding: 8px 16px;
-  background: #3B82F6;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.nav button:hover {
-  background: #2563EB;
-}
-
-.loading {
-  text-align: center;
-  padding: 50px;
-  font-size: 18px;
-  color: #666;
-}
-
-/* CENTERED DECK CARD */
-.deck-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 75vh; /* centers vertically */
-}
-
-.card {
-  width: 90%;          /* fills most of small screens */
-  max-width: 380px;    /* caps the size on larger screens */
-  aspect-ratio: 0.66;  /* height = width / 0.66, gives nice portrait ratio */
-  border-radius: 16px;
-  overflow: hidden;
-  background: #fff;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.09);
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.3s ease;
-  touch-action: pan-y;
-  user-select: none;
-}
-
-/* PHOTO GALLERY */
-.photo-wrapper {
-  position: relative;
-  width: 100%;
-  padding-top: 100%; /* Aspect ratio: height/width = 1.3 (~portrait) */
-  cursor: pointer;
-  background: #f0f0f0;
-  overflow: hidden;
-}
-
-.photo-wrapper img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* ensures image fills container without distortion */
-}
-
-.photo-dots {
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 6px;
-}
-
-.photo-dots span {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
-  transition: background 0.2s ease;
-}
-
-.photo-dots span.active {
-  background: white;
-}
-
-/* CARD INFO */
-.card-info {
-  padding: 16px 20px;
-  text-align: left;
-}
-
-.card-info h2 {
-  font-size: 24px;
-  margin: 0 0 4px 0;
-  font-weight: 700;
-}
-
-.card-info p {
-  margin: 4px 0;
-  color: #555;
-  font-size: 14px;
-}
-
-/* ACTION BUTTONS */
-.actions {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  padding-bottom: 16px;
-}
-
-.actions button {
-  width: 60px;
-  height: 60px;
-  font-size: 24px;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  color: white;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.actions button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-}
-
-.dislike {
-  background: #EF4444;
-}
-
-.like {
-  background: #22C55E;
-}
-
-/* NO MORE USERS */
-.no-more {
-  text-align: center;
-  padding: 50px;
-  font-size: 16px;
-  color: #666;
-}
-
-.no-more h2 {
-  font-size: 24px;
-  margin-bottom: 8px;
-  color: #3B82F6;
-}
-
-/* MATCH MODAL */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-}
-
-.modal-content {
-  background: #fff;
-  padding: 32px;
-  border-radius: 16px;
-  text-align: center;
-  max-width: 400px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-}
-
-.modal-content h2 {
-  font-size: 28px;
-  margin-bottom: 12px;
-  color: #3B82F6;
-}
-
-.modal-content p {
-  font-size: 16px;
-  color: #555;
-  margin-bottom: 20px;
-}
-
-.send-message-btn {
-  padding: 12px 20px;
-  font-size: 16px;
-  border-radius: 8px;
-  border: none;
-  margin: 8px;
-  background: #3B82F6;
-  color: white;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.send-message-btn:hover {
-  background: #2563EB;
-}
-
-.keep-swiping-btn {
-  padding: 12px 20px;
-  font-size: 16px;
-  border-radius: 8px;
-  border: none;
-  margin: 8px;
-  background: #6B7280;
-  color: white;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.keep-swiping-btn:hover {
-  background: #4B5563;
-}
-
-.modal-content button:hover {
-  background: linear-gradient(135deg, #ff7575 0%, #ea580c 100%);
-}
-
-.logo-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.logo-wrapper .logo {
-  width: 48px;     /* slightly smaller than login logo */
-  height: 48px;
-  border-radius: 12px;
-  object-fit: contain;
-}
-
-.logo-wrapper .app-name {
-  font-size: 28px;
-  font-weight: 800;
-  background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  letter-spacing: -1px;
-  margin: 0;
-}
-
-
-/* RESPONSIVE */
-@media (max-width: 480px) {
-  .deck {
-    padding: 16px;
-  }
-
-  .header h1 {
-    font-size: 28px;
-  }
-
-  .card {
-    width: 280px;
-    height: 440px;
-  }
-
-  .card-info h2 {
-    font-size: 20px;
-  }
-
-  .actions button {
-    width: 50px;
-    height: 50px;
-    font-size: 20px;
-  }
-
-  .photo-wrapper {
-    height: auto;
-  }
-}
-
 </style>
-  

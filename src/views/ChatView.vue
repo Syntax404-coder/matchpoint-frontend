@@ -1,52 +1,81 @@
 <template>
-  <div class="chat">
-    <div class="header">
-      <router-link to="/matches">← Back</router-link>
+  <div class="flex flex-col h-screen relative z-10 overflow-hidden bg-black/20">
+    <!-- Header -->
+    <div class="flex items-center gap-4 px-4 py-3 bg-white/10 backdrop-blur-xl border-b border-white/10 z-20 shadow-lg">
+      <router-link to="/matches" class="p-2 -ml-2 rounded-full hover:bg-white/10 text-white transition-colors">
+        <ArrowLeft class="w-6 h-6" />
+      </router-link>
       
-      <div class="other-user-info">
-        <h2>{{ otherUserName }}</h2>
-      </div>
-    </div>
-
-    <div class="messages" ref="messagesContainer">
-      <div 
-        v-for="msg in messages" 
-        :key="msg.id"
-        :class="['message', msg.sender.id === currentUserId ? 'sent' : 'received']"
-      >
-        <!-- Avatar for received messages only -->
-        <img 
-          v-if="msg.sender.id !== currentUserId && msg.sender.primaryPhotoUrl" 
-          :src="msg.sender.primaryPhotoUrl" 
-          class="message-avatar" 
-        />
-
-        <div class="message-content">
-          <p>{{ msg.content }}</p>
-          <span class="time">{{ formatTime(msg.createdAt) }}</span>
+      <div v-if="otherUserDetails" class="flex items-center gap-3">
+        <div class="relative">
+          <img 
+            :src="otherUserDetails.photoUrl || (otherUserDetails.gender === 'Female' ? '/girl.png' : '/boy.png')" 
+            class="w-10 h-10 rounded-full object-cover border border-white/20 bg-black/20"
+          />
+          <div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-gray-900"></div>
+        </div>
+        <div>
+          <h2 class="text-white font-bold leading-tight">{{ otherUserDetails.fullName }}</h2>
+          <p class="text-xs text-green-400 font-medium">Online</p>
         </div>
       </div>
     </div>
 
-    <form @submit.prevent="sendMessage" class="input-form">
-      <input 
-        v-model="newMessage" 
-        placeholder="Type a message..." 
-        :disabled="sending"
-      />
-      <button type="submit" :disabled="!newMessage.trim() || sending">
-        Send
-      </button>
-    </form>
+    <!-- Messages -->
+    <div class="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth" ref="messagesContainer">
+      <div 
+        v-for="msg in messages" 
+        :key="msg.id"
+        class="flex w-full"
+        :class="msg.sender.id === currentUserId ? 'justify-end' : 'justify-start'"
+      >
+        <div 
+          class="max-w-[75%] px-4 py-3 rounded-2xl shadow-sm relative group break-words text-sm md:text-base"
+          :class="[
+            msg.sender.id === currentUserId 
+              ? 'bg-gradient-to-br from-cyan-600 to-blue-600 text-white rounded-tr-sm' 
+              : 'bg-white/10 backdrop-blur-md border border-white/10 text-gray-100 rounded-tl-sm'
+          ]"
+        >
+          <p>{{ msg.content }}</p>
+          <span 
+            class="text-[10px] mt-1 block opacity-60"
+            :class="msg.sender.id === currentUserId ? 'text-blue-100 text-right' : 'text-gray-400 text-left'"
+          >
+            {{ formatTime(msg.createdAt) }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="p-4 bg-white/5 backdrop-blur-xl border-t border-white/10 z-20 pb-safe">
+      <form @submit.prevent="sendMessage" class="max-w-4xl mx-auto relative flex items-center gap-2">
+        <input 
+          v-model="newMessage" 
+          placeholder="Type a message..." 
+          class="w-full bg-black/40 text-white border border-white/10 rounded-full pl-5 pr-12 py-3.5 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all placeholder-gray-500"
+          :disabled="sending"
+        />
+        
+        <button 
+          type="submit" 
+          :disabled="!newMessage.trim() || sending"
+          class="absolute right-2 p-2 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full text-white shadow-lg hover:shadow-cyan-500/30 disabled:opacity-50 disabled:shadow-none transition-all hover:scale-105 active:scale-95"
+        >
+          <Send class="w-5 h-5 ml-0.5" />
+        </button>
+      </form>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
-import { useQuery, useMutation } from '@vue/apollo-composable'
+import { useQuery, useMutation, useSubscription } from '@vue/apollo-composable'
 import { gql } from '@apollo/client/core'
-import { useSubscription } from '@vue/apollo-composable'
+import { ArrowLeft, Send } from 'lucide-vue-next'
 
 const route = useRoute()
 const newMessage = ref('')
@@ -58,9 +87,7 @@ const matchId = route.params.matchId
 const otherUserId = route.query.userId
 const otherUserName = route.query.name
 
-
 /* ---------------- GRAPHQL ---------------- */
-
 const NEW_MESSAGE_SUBSCRIPTION = gql`
   subscription OnNewMessage($matchId: ID!) {
     newMessage(matchId: $matchId) {
@@ -106,21 +133,21 @@ const MARK_AS_READ = gql`
 `
 
 /* ---------------- QUERIES & MUTATIONS ---------------- */
-const otherUser = computed(() => {
+const otherUserDetails = computed(() => {
+  // Use query params as base or fallback to message data
   if (!messages.value.length) return {
-    fullName: otherUserName || '',
-    photoUrl: '' // fallback
+    fullName: otherUserName || 'Unknown',
+    photoUrl: null,
+    gender: 'Male' // default fallback
   }
 
-  // Take the first message as reference
   const msg = messages.value[0]
-
-  const user =
-    msg.sender.id === currentUserId.value ? msg.receiver : msg.sender
+  const user = msg.sender.id === currentUserId.value ? msg.receiver : msg.sender
 
   return {
     fullName: `${user.firstName} ${user.lastName}`,
-    photoUrl: user.primaryPhotoUrl
+    photoUrl: user.primaryPhotoUrl,
+    gender: user.gender // Assuming gender is available or we fallback
   }
 })
 
@@ -135,7 +162,7 @@ watch(subResult, (val) => {
 const { result, refetch } = useQuery(
   CONVERSATION_MESSAGES, 
   { matchId },
-  { fetchPolicy: 'network-only' }  // ← Always get fresh messages
+  { fetchPolicy: 'network-only' }
 )
 
 const { mutate: sendMessageMutation } = useMutation(SEND_MESSAGE)
@@ -201,7 +228,6 @@ const formatTime = (timestamp) => {
 }
 
 /* ---------------- LIFECYCLE ---------------- */
-// Set current user ID when data loads
 watch(result, (val) => {
   if (val?.currentUser) {
     currentUserId.value = val.currentUser.id
@@ -210,196 +236,7 @@ watch(result, (val) => {
   }
 })
 
-// Initial load
 onMounted(() => {
   scrollToBottom()
 })
 </script>
-
-<style scoped>
-.chat {
-  max-width: 600px;
-  margin: 0 auto;
-  height: 97vh;             
-  display: flex;
-  flex-direction: column;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  background: #fafafa;
-  overflow: hidden;          /* prevent scroll on the full page */
-}
-
-/* HEADER */
-.header {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 15px;
-  border-bottom: 1px solid #eee;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-.header a {
-  text-decoration: none;
-  color: #ff7575;
-  font-weight: 600;
-  transition: color 0.2s ease;
-}
-
-.header a:hover {
-  color: #f97316;
-}
-
-.other-user-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.other-user-info h2 {
-  font-size: 20px;
-  font-weight: 700;
-  margin: 0;
-  background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* MESSAGES LIST */
-.messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* MESSAGE BUBBLES */
-.message {
-  display: flex;
-  align-items: flex-end;
-  max-width: 75%;
-  padding: 12px 16px;
-  border-radius: 16px;
-  gap: 8px;
-  position: relative;
-  word-break: break-word;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-}
-
-.sent {
-  align-self: flex-end;
-  background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
-  color: white;
-  justify-content: flex-end;
-  border-bottom-right-radius: 4px;
-}
-
-.received {
-  align-self: flex-start;
-  background: #fff;
-  border: 1px solid #eee;
-  justify-content: flex-start;
-  border-bottom-left-radius: 4px;
-}
-
-.message-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-  border: 2px solid #ff7575;
-}
-
-/* MESSAGE CONTENT */
-.message-content {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.message-content p {
-  margin: 0;
-  font-size: 14px;
-}
-
-.message-content .time {
-  font-size: 11px;
-  opacity: 0.6;
-  align-self: flex-end;
-}
-
-/* INPUT FORM */
-.input-form {
-  display: flex;
-  padding: 12px 16px;
-  border-top: 1px solid #eee;
-  background: #fff;
-  gap: 10px;
-  box-shadow: 0 -2px 6px rgba(0,0,0,0.04);
-}
-
-.input-form input {
-  flex: 1;
-  padding: 12px 16px;
-  border: 1px solid #ddd;
-  border-radius: 24px;
-  font-size: 14px;
-  outline: none;
-  transition: all 0.2s ease;
-}
-
-.input-form input:focus {
-  border-color: #ff7575;
-  box-shadow: 0 0 0 3px rgba(255,117,117,0.1);
-}
-
-.input-form button {
-  padding: 12px 20px;
-  background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
-  color: white;
-  border: none;
-  border-radius: 24px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.input-form button:hover:not(:disabled) {
-  background: linear-gradient(135deg, #ff7575 0%, #ea580c 100%);
-  transform: translateY(-1px);
-}
-
-.input-form button:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-/* RESPONSIVE */
-@media (max-width: 480px) {
-  .header h2 {
-    font-size: 18px;
-  }
-
-  .message {
-    max-width: 80%;
-    padding: 10px 14px;
-  }
-
-  .message-content p {
-    font-size: 13px;
-  }
-
-  .input-form input {
-    padding: 10px 14px;
-    font-size: 13px;
-  }
-
-  .input-form button {
-    padding: 10px 16px;
-    font-size: 14px;
-  }
-}
-</style>

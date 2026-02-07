@@ -1,199 +1,268 @@
 <template>
-  <div class="admin">
-    <div class="header">
-      <h1>MatchPoint Admin Dashboard</h1>
-      <button @click="logout" class="logout-btn">Logout</button>
-    </div>
-
-    
-    
-    <!-- Loading -->
-    <div v-if="loading">Loading...</div>
-
-    <!-- Dashboard for the admin with the stats, popular users, and all users -->
-    <div v-else-if="stats" class="dashboard">
-      <section class="overview">
-        <div class="stats">
-          <div class="stat-card users">
-            <h3>Total Users</h3>
-            <p class="stat-value">{{ stats.totalUsers }}</p>
-            <span class="stat-meta">Registered accounts</span>
+  <div class="min-h-screen p-6 pb-20 relative z-10">
+    <div class="max-w-7xl mx-auto space-y-8">
+      <!-- Header -->
+      <div class="flex justify-between items-center bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-3xl shadow-lg">
+        <div class="flex items-center gap-4">
+          <div class="p-3 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl shadow-lg">
+            <LayoutDashboard class="w-8 h-8 text-white" />
           </div>
-
-          <div class="stat-card matches">
-            <h3>Total Matches</h3>
-            <p class="stat-value">{{ stats.totalMatches }}</p>
-            <span class="stat-meta">Successful matches</span>
-          </div>
-
-          <div class="stat-card swipes">
-            <h3>Total Swipes</h3>
-            <p class="stat-value">{{ stats.totalSwipes }}</p>
-            <span class="stat-meta">User interactions</span>
-          </div>
-
-          <div class="stat-card messages">
-            <h3>Total Messages</h3>
-            <p class="stat-value">{{ stats.totalMessages }}</p>
-            <span class="stat-meta">Messages sent</span>
+          <div>
+            <h1 class="text-2xl font-bold text-white tracking-wide">Admin Dashboard</h1>
+            <p class="text-gray-400 text-sm">Manage users and view statistics</p>
           </div>
         </div>
-      </section>
-
-      <!-- Table for the most popular users organized by their likes received and matches -->
-      <section class="data-section">
-        <div class="popular-users">
-          <h2>Most Popular Users</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Likes Received</th>
-                <th>Matches</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="item in stats.popularUsers" :key="item.user.id">
-                <td>{{ item.user.firstName }}</td>
-                <td>{{ item.likesReceived }}</td>
-                <td>{{ item.matchesCount }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Table for all users with their matches and actions -->
-        <div class="users-section">
-          <h2>All Users</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Province</th>
-                <th>Matches</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="user in users" :key="user.id">
-                <td>{{ user.firstName }} {{ user.lastName }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.province }}</td>
-                <td>{{ user.matchesCount }}</td>
-                <td class="actions">
-                  <button @click="viewMatches(user.id)" class="view-btn">View</button>
-                  <button @click="openUpdateModal(user)" class="update-btn">Edit</button>
-                  <button @click="deleteUser(user.id)" class="delete-btn">Delete</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- Modal for viewing matches -->
-      <div v-if="showMatchesModal" class="modal" @click="closeMatchesModal">
-        <div class="modal-content" @click.stop>
-          <h2>Matches for {{ selectedUserName }}</h2>
-
-          <div v-if="loadingMatches">Loading...</div>
-
-          <div v-else-if="userMatches.length === 0">
-            <p>No matches yet</p>
-          </div>
-
-          <table v-else>
-            <thead>
-              <tr>
-                <th>Matched With</th>
-                <th>Email</th>
-                <th>City</th>
-                <th>Date Matched</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="match in userMatches" :key="match.id">
-                <td>{{ getOtherUser(match).firstName }} {{ getOtherUser(match).lastName }}</td>
-                <td>{{ getOtherUser(match).email }}</td>
-                <td>{{ getOtherUser(match).city }}</td>
-                <td>{{ formatDate(match.createdAt) }}</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <button @click="closeMatchesModal" class="close-btn">Close</button>
-        </div>
+        <button 
+          @click="logout" 
+          class="flex items-center gap-2 px-5 py-2.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl hover:bg-red-500 hover:text-white transition-all duration-300 font-medium group"
+        >
+          <LogOut class="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+          Logout
+        </button>
       </div>
 
-      <!-- Modal for updating user information -->
-      <div v-if="showUpdateModal" class="modal" @click="closeUpdateModal">
-        <div class="modal-content" @click.stop>
-          <h2>Update User: {{ updateForm.firstName }} {{ updateForm.lastName }}</h2>
+      <!-- Loading -->
+      <div v-if="loading" class="flex justify-center p-12">
+        <Loader2 class="w-12 h-12 text-white/20 animate-spin" />
+      </div>
 
-          <form @submit.prevent="updateUser" class="update-form">
-            <div class="form-group">
-              <label>First Name</label>
-              <input v-model="updateForm.firstName" type="text" required />
+      <!-- Dashboard Content -->
+      <div v-else-if="stats" class="space-y-8">
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <GlassCard class="relative overflow-hidden group">
+            <div class="absolute -right-6 -top-6 w-32 h-32 bg-blue-500/20 rounded-full blur-2xl group-hover:bg-blue-500/30 transition-colors"></div>
+            <div class="relative z-10">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-gray-400 font-medium">Total Users</h3>
+                <Users class="w-6 h-6 text-blue-400" />
+              </div>
+              <p class="text-4xl font-bold text-white mb-1">{{ stats.totalUsers }}</p>
+              <span class="text-sm text-gray-500">Registered accounts</span>
             </div>
+          </GlassCard>
 
-            <div class="form-group">
-              <label>Last Name</label>
-              <input v-model="updateForm.lastName" type="text" required />
+          <GlassCard class="relative overflow-hidden group">
+            <div class="absolute -right-6 -top-6 w-32 h-32 bg-green-500/20 rounded-full blur-2xl group-hover:bg-green-500/30 transition-colors"></div>
+            <div class="relative z-10">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-gray-400 font-medium">Total Matches</h3>
+                <Heart class="w-6 h-6 text-green-400" />
+              </div>
+              <p class="text-4xl font-bold text-white mb-1">{{ stats.totalMatches }}</p>
+              <span class="text-sm text-gray-500">Successful matches</span>
             </div>
+          </GlassCard>
 
-            <div class="form-group">
-              <label>Email</label>
-              <input v-model="updateForm.email" type="email" required />
+          <GlassCard class="relative overflow-hidden group">
+            <div class="absolute -right-6 -top-6 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl group-hover:bg-purple-500/30 transition-colors"></div>
+            <div class="relative z-10">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-gray-400 font-medium">Total Swipes</h3>
+                <Activity class="w-6 h-6 text-purple-400" />
+              </div>
+              <p class="text-4xl font-bold text-white mb-1">{{ stats.totalSwipes }}</p>
+              <span class="text-sm text-gray-500">User interactions</span>
             </div>
+          </GlassCard>
 
-            <div class="form-group">
-              <label>City</label>
-              <input v-model="updateForm.city" type="text" required />
+          <GlassCard class="relative overflow-hidden group">
+            <div class="absolute -right-6 -top-6 w-32 h-32 bg-orange-500/20 rounded-full blur-2xl group-hover:bg-orange-500/30 transition-colors"></div>
+            <div class="relative z-10">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-gray-400 font-medium">Messages</h3>
+                <MessageCircle class="w-6 h-6 text-orange-400" />
+              </div>
+              <p class="text-4xl font-bold text-white mb-1">{{ stats.totalMessages }}</p>
+              <span class="text-sm text-gray-500">Messages sent</span>
             </div>
+          </GlassCard>
+        </div>
 
-            <div class="form-group">
-              <label>Bio</label>
-              <textarea v-model="updateForm.bio" rows="4"></textarea>
-            </div>
+        <!-- Popular Users -->
+        <GlassCard>
+          <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            <Star class="w-5 h-5 text-yellow-400 fill-current" />
+            Most Popular Users
+          </h2>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="text-gray-400 text-sm border-b border-white/10">
+                  <th class="py-4 px-4 font-medium">User</th>
+                  <th class="py-4 px-4 font-medium">Likes Received</th>
+                  <th class="py-4 px-4 font-medium">Matches</th>
+                </tr>
+              </thead>
+              <tbody class="text-gray-200">
+                <tr v-for="item in stats.popularUsers" :key="item.user.id" class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                  <td class="py-4 px-4 font-medium text-white">{{ item.user.firstName }}</td>
+                  <td class="py-4 px-4">
+                    <div class="flex items-center gap-2">
+                      <div class="w-full max-w-[100px] h-2 bg-gray-700 rounded-full overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-pink-500 to-rose-500" :style="{ width: Math.min(item.likesReceived * 2, 100) + '%' }"></div>
+                      </div>
+                      <span class="text-sm">{{ item.likesReceived }}</span>
+                    </div>
+                  </td>
+                  <td class="py-4 px-4">{{ item.matchesCount }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </GlassCard>
 
-            <div class="form-group">
-              <label>Mobile</label>
-              <input v-model="updateForm.mobile" type="text" placeholder="09123456789" />
-            </div>
+        <!-- All Users Table -->
+        <GlassCard>
+          <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            <Users class="w-5 h-5 text-cyan-400" />
+            User Management
+          </h2>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="text-gray-400 text-sm border-b border-white/10">
+                  <th class="py-4 px-4 font-medium">Name</th>
+                  <th class="py-4 px-4 font-medium">Email</th>
+                  <th class="py-4 px-4 font-medium">Location</th>
+                  <th class="py-4 px-4 font-medium">Matches</th>
+                  <th class="py-4 px-4 font-medium text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="text-gray-200">
+                <tr v-for="user in users" :key="user.id" class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                  <td class="py-4 px-4 font-medium text-white">{{ user.firstName }} {{ user.lastName }}</td>
+                  <td class="py-4 px-4 text-gray-400">{{ user.email }}</td>
+                  <td class="py-4 px-4">{{ user.province }}</td>
+                  <td class="py-4 px-4">
+                    <span class="px-2 py-1 bg-white/10 rounded-lg text-xs font-bold">{{ user.matchesCount }}</span>
+                  </td>
+                  <td class="py-4 px-4 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <button @click="viewMatches(user.id)" class="p-2 text-green-400 hover:bg-green-400/10 rounded-lg transition-colors" title="View Matches">
+                        <Eye class="w-5 h-5" />
+                      </button>
+                      <button @click="openUpdateModal(user)" class="p-2 text-blue-400 hover:bg-blue-400/10 rounded-lg transition-colors" title="Edit User">
+                        <Edit2 class="w-5 h-5" />
+                      </button>
+                      <button @click="deleteUser(user.id)" class="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-colors" title="Delete User">
+                        <Trash2 class="w-5 h-5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </GlassCard>
+      </div>
 
-            <div class="form-group">
-              <label>School</label>
-              <input v-model="updateForm.school" type="text" placeholder="Optional" />
-            </div>
-
-            <div class="form-group">
-              <label>Sexual Orientation</label>
-              <select v-model="updateForm.sexualOrientation">
-                <option value="" disabled hidden>Select</option>
-                <option value="Straight">Straight</option>
-                <option value="Bisexual">Bisexual</option>
-                <option value="Gay">Gay</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-
-
-            <div v-if="updateError" class="error-message">
-              {{ updateError }}
-            </div>
-
-            <div class="form-actions">
-              <button type="submit" :disabled="updating" class="save-btn">
-                {{ updating ? 'Updating...' : 'Save Changes' }}
+      <!-- Matches Modal -->
+      <transition name="modal">
+        <div v-if="showMatchesModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" @click="closeMatchesModal">
+          <GlassCard class="w-full max-w-2xl max-h-[80vh] flex flex-col" @click.stop>
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-2xl font-bold text-white">Matches for {{ selectedUserName }}</h2>
+              <button @click="closeMatchesModal" class="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-colors">
+                <X class="w-6 h-6" />
               </button>
-              <button type="button" @click="closeUpdateModal" class="cancel-btn">Cancel</button>
             </div>
-          </form>
+
+            <div v-if="loadingMatches" class="flex justify-center p-8">
+              <Loader2 class="w-8 h-8 text-white/20 animate-spin" />
+            </div>
+
+            <div v-else-if="userMatches.length === 0" class="text-center p-8 text-gray-400">
+              No matches found for this user.
+            </div>
+
+            <div v-else class="overflow-y-auto flex-1">
+              <table class="w-full text-left">
+                <thead class="sticky top-0 bg-gray-900/90 backdrop-blur-sm z-10">
+                  <tr class="text-gray-400 text-sm border-b border-white/10">
+                    <th class="py-3 px-4">Matched With</th>
+                    <th class="py-3 px-4">Email</th>
+                    <th class="py-3 px-4">City</th>
+                    <th class="py-3 px-4">Date</th>
+                  </tr>
+                </thead>
+                <tbody class="text-gray-200">
+                  <tr v-for="match in userMatches" :key="match.id" class="border-b border-white/5">
+                    <td class="py-3 px-4 font-medium bg-black/50">{{ getOtherUser(match).firstName }} {{ getOtherUser(match).lastName }}</td>
+                    <td class="py-3 px-4 text-sm">{{ getOtherUser(match).email }}</td>
+                    <td class="py-3 px-4 text-sm">{{ getOtherUser(match).city }}</td>
+                    <td class="py-3 px-4 text-sm whitespace-nowrap">{{ formatDate(match.createdAt) }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </GlassCard>
         </div>
-      </div>
+      </transition>
+
+      <!-- Update User Modal -->
+      <transition name="modal">
+        <div v-if="showUpdateModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" @click="closeUpdateModal">
+          <GlassCard class="w-full max-w-lg max-h-[90vh] overflow-y-auto" @click.stop>
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-2xl font-bold text-white">Edit User</h2>
+              <button @click="closeUpdateModal" class="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-colors">
+                <X class="w-6 h-6" />
+              </button>
+            </div>
+
+            <form @submit.prevent="updateUser" class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <GlassInput v-model="updateForm.firstName" label="First Name" required />
+                <GlassInput v-model="updateForm.lastName" label="Last Name" required />
+              </div>
+              
+              <GlassInput v-model="updateForm.email" label="Email" type="email" required />
+              
+              <div class="grid grid-cols-2 gap-4">
+                <GlassSelect v-model="updateForm.province" label="Province" required @change="onProvinceChange">
+                  <option value="" disabled>Select Province</option>
+                  <option v-for="prov in provinces" :key="prov" :value="prov" class="text-black">{{ prov }}</option>
+                </GlassSelect>
+                <GlassSelect v-model="updateForm.city" label="City" required :disabled="!updateForm.province">
+                  <option value="" disabled>City</option>
+                  <option v-for="city in availableCities" :key="city" :value="city" class="text-black">{{ city }}</option>
+                </GlassSelect>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <GlassInput v-model="updateForm.mobile" label="Mobile" placeholder="09123456789" />
+                <GlassInput v-model="updateForm.school" label="School" placeholder="Optional" />
+              </div>
+
+              <GlassSelect v-model="updateForm.sexualOrientation" label="Sexual Orientation">
+                <option value="" disabled>Select</option>
+                <option value="Straight" class="text-black">Straight</option>
+                <option value="Bisexual" class="text-black">Bisexual</option>
+                <option value="Gay" class="text-black">Gay</option>
+                <option value="Other" class="text-black">Other</option>
+              </GlassSelect>
+
+              <GlassTextarea v-model="updateForm.bio" label="Bio" placeholder="User bio..." />
+
+              <div v-if="updateError" class="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-200 text-sm">
+                {{ updateError }}
+              </div>
+
+              <div class="flex gap-3 pt-4">
+                <GlassButton type="button" variant="secondary" @click="closeUpdateModal">
+                  Cancel
+                </GlassButton>
+                <GlassButton type="submit" variant="primary" :disabled="updating">
+                  <Loader2 v-if="updating" class="w-5 h-5 animate-spin" />
+                  <span v-else>Save Changes</span>
+                </GlassButton>
+              </div>
+            </form>
+          </GlassCard>
+        </div>
+      </transition>
     </div>
-    
   </div>
 </template>
 
@@ -202,8 +271,17 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuery, useMutation, useLazyQuery } from '@vue/apollo-composable'
 import { gql } from '@apollo/client/core'
+import { philippines as provinceCities } from '../data/philippines'
+import { 
+  Loader2, LogOut, LayoutDashboard, Users, Heart, Activity, 
+  MessageCircle, Star, Eye, Edit2, Trash2, X 
+} from 'lucide-vue-next'
+import GlassCard from '../components/ui/GlassCard.vue'
+import GlassButton from '../components/ui/GlassButton.vue'
+import GlassInput from '../components/ui/GlassInput.vue'
+import GlassSelect from '../components/ui/GlassSelect.vue'
+import GlassTextarea from '../components/ui/GlassTextarea.vue'
 
-// initialize the router
 const router = useRouter()
 
 const showMatchesModal = ref(false)
@@ -219,96 +297,92 @@ const updateForm = ref({
   lastName: '',
   email: '',
   city: '',
+  province: '',
   bio: '',
   mobile: '',
   school: '',
   sexualOrientation: ''
 })
 
+/* ---------------- DATA ---------------- */
+const provinces = Object.keys(provinceCities)
+
+const availableCities = computed(() => {
+  if (!updateForm.value.province) return []
+  return provinceCities[updateForm.value.province] || []
+})
+
+const onProvinceChange = () => {
+  updateForm.value.city = ''
+}
+
 /* ---------------- GRAPHQL ---------------- */
 
-// Query for the dashboard stats
 const DASHBOARD_STATS = gql`
-      query DashboardStats {
-        dashboardStats(popularLimit: 10) {
-          totalUsers
-          totalMatches
-          totalSwipes
-          totalMessages
-          popularUsers {
-            user { id firstName }
-            likesReceived
-            matchesCount
-          }
-        }
-        allUsers(limit: 50) {
-          id
-          firstName
-          lastName
-          email
-          city
-          province
-          bio
-          mobile
-          school
-          sexualOrientation
-          matchesCount
-        }
+  query DashboardStats {
+    dashboardStats(popularLimit: 10) {
+      totalUsers
+      totalMatches
+      totalSwipes
+      totalMessages
+      popularUsers {
+        user { id firstName }
+        likesReceived
+        matchesCount
       }
-    `
+    }
+    allUsers(limit: 50) {
+      id
+      firstName
+      lastName
+      email
+      city
+      province
+      bio
+      mobile
+      school
+      sexualOrientation
+      matchesCount
+    }
+  }
+`
 
-// Query for the user matches
 const USER_MATCHES = gql`
-      query UserMatches($userId: ID!) {
-        userMatches(userId: $userId) {
-          id
-          user1 { id firstName lastName email city }
-          user2 { id firstName lastName email city }
-          createdAt
-        }
-      }
-    `
+  query UserMatches($userId: ID!) {
+    userMatches(userId: $userId) {
+      id
+      user1 { id firstName lastName email city }
+      user2 { id firstName lastName email city }
+      createdAt
+    }
+  }
+`
 
-// Query for the user details
-const USER_DETAILS = gql`
-      query UserDetails($userId: ID!) {
-        user(userId: $userId) {
-          id
-          firstName
-          lastName
-          email
-          city
-          bio
-        }
-      }
-    `
-
-// Mutation for updating a user
 const UPDATE_USER = gql`
-      mutation UpdateUser($input: UpdateUserInput!) {
-        updateUser(input: $input) {
-          user {
-            id
-            firstName
-            lastName
-            email
-            city
-            bio
-          }
-          errors
-        }
+  mutation UpdateUser($input: UpdateUserInput!) {
+    updateUser(input: $input) {
+      user {
+        id
+        firstName
+        lastName
+        email
+        city
+        province
+        bio
       }
-    `
+      errors
+    }
+  }
+`
 
-// Mutation for deleting a user
 const DELETE_USER = gql`
-      mutation DeleteUser($input: DeleteUserInput!) {
-        deleteUser(input: $input) {
-          success
-          errors
-        }
-      }
-    `
+  mutation DeleteUser($input: DeleteUserInput!) {
+    deleteUser(input: $input) {
+      success
+      errors
+    }
+  }
+`
 
 const { result, loading, refetch } = useQuery(DASHBOARD_STATS, null, {
   fetchPolicy: 'network-only'
@@ -317,50 +391,43 @@ const { result, loading, refetch } = useQuery(DASHBOARD_STATS, null, {
 const { mutate: deleteUserMutation } = useMutation(DELETE_USER)
 const { mutate: updateUserMutation } = useMutation(UPDATE_USER)
 
-// Lazy query for user matches - only runs when called
 const {
   result: matchesResult,
   loading: loadingMatches,
   load: loadUserMatches
 } = useLazyQuery(USER_MATCHES)
 
-// Computed properties, returns the data from the query
 const stats = computed(() => result.value?.dashboardStats)
 const users = computed(() => result.value?.allUsers || [])
 const userMatches = computed(() => matchesResult.value?.userMatches || [])
 
-// View matches for a user using the lazy query
 const viewMatches = async (userId) => {
   const user = users.value.find(u => u.id === userId)
   selectedUserId.value = userId
   selectedUserName.value = `${user.firstName} ${user.lastName}`
   showMatchesModal.value = true
 
-  // Load matches for this user
   await loadUserMatches(USER_MATCHES, { userId })
 }
 
-// Get the other user from a match
 const getOtherUser = (match) => {
   return match.user1.id === selectedUserId.value ? match.user2 : match.user1
 }
 
-// Close the matches modal
 const closeMatchesModal = () => {
   showMatchesModal.value = false
   selectedUserId.value = null
   selectedUserName.value = ''
 }
 
-// Open update modal and load user details
-// use allUsers query to get the user details
 const openUpdateModal = async (user) => {
   updateForm.value = {
     id: user.id,
     firstName: user.firstName,
     lastName: user.lastName,
     email: user.email,
-    city: user.city,
+    province: user.province || '',
+    city: user.city || '',
     bio: user.bio || '',
     mobile: user.mobile || '',
     school: user.school || '',
@@ -370,7 +437,6 @@ const openUpdateModal = async (user) => {
   updateError.value = null
 }
 
-// Close update modal
 const closeUpdateModal = () => {
   showUpdateModal.value = false
   updateForm.value = {
@@ -379,17 +445,16 @@ const closeUpdateModal = () => {
     lastName: '',
     email: '',
     city: '',
+    province: '',
     bio: ''
   }
   updateError.value = null
 }
 
-// Update user information
 const updateUser = async () => {
   updating.value = true
   updateError.value = null
 
-  // Optional frontend mobile validation
   if (updateForm.value.mobile && !/^\+?\d{10,15}$/.test(updateForm.value.mobile)) {
     updateError.value = "Mobile number must be 10-15 digits"
     updating.value = false
@@ -404,6 +469,7 @@ const updateUser = async () => {
         lastName: updateForm.value.lastName,
         email: updateForm.value.email,
         city: updateForm.value.city,
+        province: updateForm.value.province,
         bio: updateForm.value.bio,
         mobile: updateForm.value.mobile,
         school: updateForm.value.school,
@@ -414,7 +480,6 @@ const updateUser = async () => {
     if (data?.updateUser?.errors?.length) {
       updateError.value = data.updateUser.errors.join(', ')
     } else {
-      // Success - refresh the user list and close modal
       await refetch()
       closeUpdateModal()
     }
@@ -425,7 +490,6 @@ const updateUser = async () => {
   }
 }
 
-// Format the date
 const formatDate = (timestamp) => {
   return new Date(timestamp).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -434,9 +498,8 @@ const formatDate = (timestamp) => {
   })
 }
 
-// Delete a user by id using the deleteUserMutation
 const deleteUser = async (userId) => {
-  if (!confirm('Are you sure?')) return
+  if (!confirm('Are you sure you want to delete this user?')) return
 
   try {
     await deleteUserMutation({ input: { userId } })
@@ -446,7 +509,6 @@ const deleteUser = async (userId) => {
   }
 }
 
-// Logout the user by removing the token from localStorage and redirecting to the login page
 const logout = () => {
   localStorage.removeItem('token')
   router.push('/login')
@@ -454,397 +516,13 @@ const logout = () => {
 </script>
 
 <style scoped>
-.admin {
-  max-width: 1400px;
-  margin: 40px auto;
-  padding: 40px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 40px;
-  padding: 24px;
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-}
-
-.header h1 {
-  margin: 0;
-  font-size: 32px;
-  font-weight: 700;
-  color: #3B82F6;
-  letter-spacing: -0.5px;
-}
-
-.logout-btn {
-  background: #3B82F6;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-}
-
-.logout-btn:hover {
-  background: #2563EB;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-  transform: translateY(-1px);
-}
-
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 24px;
-  margin-bottom: 40px;
-}
-
-.stat-card {
-  padding: 20px 24px;
-  background: white;
-  border-radius: 12px;
-  border: 1px solid #eee;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-  text-align: left;
-}
-
-.stat-card h3 {
-  font-size: 15px;
-  font-weight: 600;
-  color: #6b7280;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-}
-
-.stat-value {
-  font-size: 36px;
-  font-weight: 700;
-  color: #111827;
-}
-
-.stat-meta {
-  font-size: 13px;
-  color: #9ca3af;
-}
-
-.stat-card p {
-  margin: 0;
-  font-size: 62px;
-  font-weight: 800;
-  color: #3B82F6;
-}
-
-.popular-users,
-.users-section {
-  margin-top: 40px;
-  background: #FFFFFF;
-  border: 1px solid #E5E7EB;
-  padding: 32px;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-}
-
-.popular-users h2,
-.users-section h2 {
-  margin: 0 0 24px;
-  font-size: 24px;
-  font-weight: 700;
-  color: #3B82F6;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-}
-
-th,
-td {
-  padding: 16px;
-  text-align: left;
-  border-bottom: 2px solid #f5f5f5;
-}
-
-th {
-  background: #F3F4F6;
-  font-weight: 700;
-  color: #333;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-tbody tr {
-  transition: background 0.2s ease;
-}
-
-tbody tr:hover {
-  background: #F9FAFB;
-}
-
-.actions {
-  white-space: nowrap;
-}
-
-.view-btn,
-.update-btn,
-.delete-btn {
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  margin-right: 6px;
-  transition: all 0.2s ease;
-}
-
-.view-btn {
-  background: #22C55E;
-  color: white;
-  box-shadow: 0 2px 6px rgba(34, 197, 94, 0.3);
-}
-
-.view-btn:hover {
-  background: #16A34A;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(34, 197, 94, 0.4);
-}
-
-.update-btn {
-  background: #3B82F6;
-  color: white;
-  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
-}
-
-.update-btn:hover {
-  background: #2563EB;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
-}
-
-.delete-btn {
-  background: #EF4444;
-  color: white;
-  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
-}
-
-.delete-btn:hover {
-  background: #DC2626;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
-}
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  backdrop-filter: blur(4px);
-}
-
-.modal-content {
-  background: white;
-  padding: 40px;
-  border-radius: 16px;
-  max-width: 800px;
-  max-height: 80vh;
-  overflow-y: auto;
-  width: 90%;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-}
-
-.modal-content h2 {
-  margin: 0 0 24px;
-  font-size: 24px;
-  font-weight: 700;
-  background: linear-gradient(135deg, #ff7575 0%, #f97316 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.close-btn {
-  margin-top: 24px;
-  padding: 12px 24px;
-  background: #666;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.close-btn:hover {
-  background: #555;
-  transform: translateY(-1px);
-}
-
-.update-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.form-group label {
-  font-weight: 600;
-  color: #333;
-  font-size: 14px;
-}
-
-.form-group input,
-.form-group textarea,
-.form-group select {
-  padding: 14px 16px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 16px;
-  font-family: inherit;
-  background: #fafafa;
-  transition: all 0.2s ease;
-}
-
-.form-group input:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: #ffaa75;
-  background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(255, 117, 117, 0.1);
-}
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 100px;
-}
-
-.error-message {
-  padding: 14px 16px;
-  background: #ffebee;
-  color: #d32f2f;
-  border-radius: 8px;
-  border-left: 4px solid #d32f2f;
-  font-size: 14px;
-}
-
-.form-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-  margin-top: 12px;
-}
-
-.save-btn {
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-}
-
-.save-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-}
-
-.save-btn:disabled {
-  background: #e0e0e0;
-  color: #9e9e9e;
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
-}
-
-.cancel-btn {
-  padding: 12px 24px;
-  background: #666;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.cancel-btn:hover {
-  background: #555;
-  transform: translateY(-1px);
-}
-
-@media (max-width: 768px) {
-  .admin {
-    padding: 20px;
-    margin: 20px;
-  }
-
-  .header {
-    flex-direction: column;
-    gap: 16px;
-    text-align: center;
-  }
-
-  .stats {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 16px;
-  }
-
-  .stat-card {
-    padding: 20px;
-  }
-
-  .stat-card p {
-    font-size: 28px;
-  }
-
-  table {
-    font-size: 14px;
-  }
-
-  th,
-  td {
-    padding: 12px 8px;
-  }
-
-  .view-btn,
-  .update-btn,
-  .delete-btn {
-    padding: 6px 12px;
-    font-size: 12px;
-    margin: 2px;
-  }
-}
-
-.overview {
-  margin-bottom: 48px;
-}
-
-.data-section {
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
 }
 </style>

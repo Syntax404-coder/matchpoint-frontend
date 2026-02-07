@@ -1,82 +1,104 @@
 <template>
-  <div class="min-h-screen flex flex-col items-center justify-center p-6 relative z-10">
-    <!-- Logo -->
-    <div class="mb-8 p-4 bg-white/5 rounded-full backdrop-blur-md border border-white/10 shadow-lg animate-pulse">
-      <img src="/icon.png" alt="MatchPoint Logo" class="w-20 h-20 object-contain drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+  <div class="flex h-screen w-full overflow-hidden">
+    <!-- Left Column: Gradient Background with Logo -->
+    <div class="hidden md:flex md:w-3/5 lg:w-2/3 relative bg-gradient-to-br from-gray-900 via-blue-900 to-black">
+      <!-- Logo - Top Left -->
+      <div class="absolute top-8 left-12 flex items-center gap-3">
+        <img src="/icon.png" alt="MatchPoint" class="w-12 h-12 object-contain drop-shadow-lg" />
+        <span class="text-2xl font-bold text-white tracking-wide">MatchPoint</span>
+      </div>
+      
+      <!-- Optional: Decorative elements -->
+      <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl"></div>
+      </div>
     </div>
 
-    <!-- Card -->
-    <GlassCard class="w-full max-w-md">
-      <h1 class="text-3xl font-bold text-white text-center mb-2 tracking-wide">Welcome Back</h1>
-      <p class="text-gray-400 text-center mb-8">Sign in to continue to MatchPoint</p>
-
-      <form @submit.prevent="handleLogin" class="space-y-6">
-        <!-- Email -->
-        <GlassInput
-          v-model="email"
-          label="Email"
-          id="email"
-          type="email"
-          placeholder="Enter your email"
-          required
-        >
-          <template #icon>
-            <MailIcon class="w-5 h-5" />
-          </template>
-        </GlassInput>
-
-        <!-- Password -->
-        <GlassInput
-          v-model="password"
-          label="Password"
-          id="password"
-          :type="showPassword ? 'text' : 'password'"
-          placeholder="Enter your password"
-          required
-        >
-          <template #icon>
-            <button type="button" @click="showPassword = !showPassword" class="focus:outline-none hover:text-white transition-colors cursor-pointer">
-              <component :is="showPassword ? Eye : EyeOff" class="w-5 h-5" />
-            </button>
-          </template>
-        </GlassInput>
-
-        <!-- Submit -->
-        <GlassButton type="submit" :disabled="loading" variant="primary">
-          <Loader2 v-if="loading" class="w-5 h-5 animate-spin" />
-          <span v-else>Sign In</span>
-        </GlassButton>
-
-        <!-- Error -->
-        <div v-if="error" class="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-xl text-sm flex items-start gap-2">
-          <AlertCircle class="w-5 h-5 flex-shrink-0 mt-0.5" />
-          <span>{{ error }}</span>
-        </div>
-      </form>
-
-      <!-- Register Link -->
-      <div class="mt-8 text-center text-gray-400 text-sm">
-        Don't have an account? 
-        <router-link to="/register" class="text-white font-semibold hover:text-cyan-400 transition-colors">
-          Create an account
-        </router-link>
+    <!-- Right Column: Form Side -->
+    <div class="w-full md:w-2/5 lg:w-1/3 bg-black/80 backdrop-blur-3xl flex flex-col justify-center items-center px-8">
+      
+      <!-- Mobile Logo (shown only on small screens) -->
+      <div class="md:hidden flex items-center gap-3 mb-8">
+        <img src="/icon.png" alt="MatchPoint" class="w-10 h-10 object-contain" />
+        <span class="text-xl font-bold text-white">MatchPoint</span>
       </div>
-    </GlassCard>
+
+      <!-- Card 1: Main Form -->
+      <div class="w-full max-w-sm bg-white/5 border border-white/10 rounded-xl p-8 mb-4 shadow-lg">
+        <h1 class="text-2xl font-bold text-white text-center mb-2">Welcome Back</h1>
+        <p class="text-gray-400 text-center text-sm mb-6">Sign in to continue</p>
+
+        <form @submit.prevent="handleLogin" class="space-y-4">
+          <!-- Email -->
+          <div>
+            <input 
+              v-model="email" 
+              type="email" 
+              placeholder="Email" 
+              required
+              class="w-full bg-gray-900 text-white border border-gray-700 rounded-sm px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors placeholder-gray-500"
+            />
+          </div>
+
+          <!-- Password -->
+          <div class="relative">
+            <input 
+              v-model="password" 
+              :type="showPassword ? 'text' : 'password'" 
+              placeholder="Password" 
+              required
+              class="w-full bg-gray-900 text-white border border-gray-700 rounded-sm px-4 py-3 text-sm focus:outline-none focus:border-cyan-500 transition-colors placeholder-gray-500 pr-12"
+            />
+            <button 
+              type="button" 
+              @click="showPassword = !showPassword"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+            >
+              <Eye v-if="!showPassword" class="w-5 h-5" />
+              <EyeOff v-else class="w-5 h-5" />
+            </button>
+          </div>
+
+          <!-- Sign In Button -->
+          <button 
+            type="submit" 
+            :disabled="loading"
+            class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold py-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            <Loader2 v-if="loading" class="w-5 h-5 animate-spin" />
+            <span v-else>Sign In</span>
+          </button>
+
+          <!-- Error Message -->
+          <div v-if="error" class="bg-red-500/10 border border-red-500/20 text-red-300 text-sm px-4 py-3 rounded-lg flex items-start gap-2">
+            <AlertCircle class="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <span>{{ error }}</span>
+          </div>
+        </form>
+      </div>
+
+      <!-- Card 2: Sign Up Link -->
+      <div class="w-full max-w-sm bg-white/5 border border-white/10 rounded-xl p-6 text-center shadow-lg">
+        <p class="text-gray-400 text-sm">
+          Don't have an account? 
+          <router-link to="/register" class="text-cyan-400 font-semibold hover:underline">
+            Sign up
+          </router-link>
+        </p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useMutation } from '@vue/apollo-composable'
 import { gql } from '@apollo/client/core'
-import { Eye, EyeOff, Mail as MailIcon, Loader2, AlertCircle } from 'lucide-vue-next'
-import GlassCard from '../components/ui/GlassCard.vue'
-import GlassInput from '../components/ui/GlassInput.vue'
-import GlassButton from '../components/ui/GlassButton.vue'
+import { Eye, EyeOff, Loader2, AlertCircle } from 'lucide-vue-next'
 
 const router = useRouter()
-const route = useRoute()
 
 const email = ref('')
 const password = ref('')
@@ -87,7 +109,7 @@ const LOGIN_USER = gql`
   mutation LoginUser($input: LoginUserInput!) {
     loginUser(input: $input) {
       token
-      user { id firstName role }
+      user { id role firstName }
       errors
     }
   }
@@ -100,19 +122,21 @@ const handleLogin = async () => {
 
   try {
     const { data } = await loginUser({
-      input: { email: email.value, password: password.value }
+      input: {
+        email: email.value,
+        password: password.value
+      }
     })
 
     if (data.loginUser.errors.length) {
       error.value = data.loginUser.errors.join(', ')
     } else {
       localStorage.setItem('token', data.loginUser.token)
-      const userRole = data.loginUser.user?.role
-      if (userRole === 'admin') {
+      
+      if (data.loginUser.user.role === 'admin') {
         router.push('/admin')
       } else {
-        const redirect = route.query.redirect || '/deck'
-        router.push(redirect)
+        router.push('/deck')
       }
     }
   } catch (e) {

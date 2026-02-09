@@ -222,12 +222,15 @@ watch(result, (val) => {
 
 onMounted(() => {
   scrollToBottom()
+  console.log('[ChatView] Starting message polling...')
   // Start polling for new messages every 3 seconds
   pollingInterval = setInterval(async () => {
     const previousCount = messages.value.length
+    console.log('[ChatView] Polling for new messages...')
     await refetch()
     // Scroll to bottom only if new messages arrived
     if (messages.value.length > previousCount) {
+      console.log('[ChatView] New messages received!')
       scrollToBottom()
     }
   }, 3000)

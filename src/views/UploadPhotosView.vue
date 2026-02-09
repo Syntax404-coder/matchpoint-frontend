@@ -80,7 +80,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useMutation, useQuery } from '@vue/apollo-composable'
+import { useMutation, useQuery, provideApolloClient } from '@vue/apollo-composable'
 import { gql } from '@apollo/client/core'
 import { apolloClient } from '../apollo'
 import { UploadCloud, Image, Loader2, Star } from 'lucide-vue-next'
@@ -88,6 +88,7 @@ import GlassCard from '../components/ui/GlassCard.vue'
 import GlassButton from '../components/ui/GlassButton.vue'
 
 const router = useRouter()
+provideApolloClient(apolloClient)
 
 const selectedFile = ref(null)
 const uploading = ref(false)
@@ -141,7 +142,13 @@ const uploadPhoto = async () => {
   error.value = null
 
   try {
+    console.log('Starting upload from UploadPhotosView...')
     const isFirstUpload = photos.value.length === 0
+    console.log('Payload check:', {
+      imageType: selectedFile.value?.constructor?.name,
+      image: selectedFile.value,
+      isPrimary: isFirstUpload
+    })
 
     const { data } = await uploadPhotoMutation({
       input: {

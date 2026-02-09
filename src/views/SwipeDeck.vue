@@ -234,8 +234,8 @@ watch(showEditProfileModal, (newVal) => {
 
 /* ---------------- GRAPHQL ---------------- */
 const UPDATE_PROFILE = gql`
-  mutation UpdateProfile($firstName: String, $lastName: String, $bio: String, $city: String) {
-    updateProfile(firstName: $firstName, lastName: $lastName, bio: $bio, city: $city) {
+  mutation UpdateProfile($input: UpdateProfileInput!) {
+    updateProfile(input: $input) {
       user {
         id
         firstName
@@ -263,8 +263,8 @@ const UPLOAD_PHOTO = gql`
 `
 
 const DELETE_PHOTO = gql`
-  mutation DeletePhoto($id: ID!) {
-    deletePhoto(id: $id) {
+  mutation DeletePhoto($input: DeletePhotoInput!) {
+    deletePhoto(input: $input) {
       photo { id }
       errors
     }
@@ -451,10 +451,12 @@ const saveProfile = async () => {
   updateError.value = ''
   try {
     const { data } = await updateProfile({
-      firstName: profileForm.firstName,
-      lastName: profileForm.lastName,
-      bio: profileForm.bio,
-      city: profileForm.city
+      input: {
+        firstName: profileForm.firstName,
+        lastName: profileForm.lastName,
+        bio: profileForm.bio,
+        city: profileForm.city
+      }
     })
     if (data?.updateProfile?.errors?.length > 0) {
       updateError.value = data.updateProfile.errors.join(', ')
@@ -526,7 +528,9 @@ const deletePhoto = async (photoId) => {
   if (!confirm('Are you sure you want to delete this photo?')) return
 
   try {
-    const { data } = await deletePhotoMutation({ id: photoId })
+    const { data } = await deletePhotoMutation({ 
+      input: { id: photoId } 
+    })
     
     if (data?.deletePhoto?.errors?.length) {
       photoError.value = data.deletePhoto.errors.join(', ')

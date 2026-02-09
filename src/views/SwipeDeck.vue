@@ -221,8 +221,8 @@ watch(showEditProfileModal, (newVal) => {
 
 /* ---------------- GRAPHQL ---------------- */
 const UPDATE_PROFILE = gql`
-  mutation UpdateProfile($firstName: String, $lastName: String, $bio: String, $city: String) {
-    updateProfile(firstName: $firstName, lastName: $lastName, bio: $bio, city: $city) {
+  mutation UpdateProfile($input: UpdateProfileInput!) {
+    updateProfile(input: $input) {
       user {
         id
         firstName
@@ -423,10 +423,12 @@ const saveProfile = async () => {
   updateError.value = ''
   try {
     const { data } = await updateProfile({
-      firstName: profileForm.firstName,
-      lastName: profileForm.lastName,
-      bio: profileForm.bio,
-      city: profileForm.city
+      input: {
+        firstName: profileForm.firstName,
+        lastName: profileForm.lastName,
+        bio: profileForm.bio,
+        city: profileForm.city
+      }
     })
     if (data?.updateProfile?.errors?.length > 0) {
       updateError.value = data.updateProfile.errors.join(', ')

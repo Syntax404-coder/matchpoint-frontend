@@ -22,6 +22,8 @@ const CURRENT_USER = gql`
   }
 `
 
+import { apolloClient } from '@/apollo'
+
 export function useAuth() {
   const token = computed(() => localStorage.getItem('token'))
 
@@ -31,6 +33,7 @@ export function useAuth() {
     {
       enabled: computed(() => !!token.value),
       fetchPolicy: 'network-only',
+      client: apolloClient,
     }
   )
 

@@ -320,14 +320,15 @@ const { result, loading, refetch } = useQuery(
   { limit: 20 },
   {
     enabled: computed(() => !!authUser.value),
-    fetchPolicy: 'network-only'
+    fetchPolicy: 'network-only',
+    client: apolloClient
   }
 )
 
-const { mutate: createSwipe } = useMutation(CREATE_SWIPE)
-const { mutate: updateProfile, loading: updating } = useMutation(UPDATE_PROFILE)
-const { mutate: uploadPhotoMutation } = useMutation(UPLOAD_PHOTO)
-const { mutate: deletePhotoMutation } = useMutation(DELETE_PHOTO)
+const { mutate: createSwipe } = useMutation(CREATE_SWIPE, { client: apolloClient })
+const { mutate: updateProfile, loading: updating } = useMutation(UPDATE_PROFILE, { client: apolloClient })
+const { mutate: uploadPhotoMutation } = useMutation(UPLOAD_PHOTO, { client: apolloClient })
+const { mutate: deletePhotoMutation } = useMutation(DELETE_PHOTO, { client: apolloClient })
 
 /* ------ SWIPE FUNCTION --------- */
 const onStart = (e) => {

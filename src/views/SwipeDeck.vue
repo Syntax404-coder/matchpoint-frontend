@@ -265,7 +265,14 @@ const UPLOAD_PHOTO = gql`
 const DELETE_PHOTO = gql`
   mutation DeletePhoto($input: DeletePhotoInput!) {
     deletePhoto(input: $input) {
-      photo { id }
+      user {
+        id
+        photos {
+          id
+          url
+          position
+        }
+      }
       errors
     }
   }
@@ -544,7 +551,9 @@ const deletePhoto = async (photoId) => {
       photoError.value = data.deletePhoto.errors.join(', ')
     } else {
       console.log('Delete success:', data.deletePhoto)
-      // Success - refetch
+      // Update local state immediately if needed, or rely on refetch
+      // The backend returns the updated user, so we could update authUser directly
+      // but refetch is safer for consistency across the app
       const { useAuth } = await import('@/composables/useAuth')
       const { refetch } = useAuth()
       await refetch()

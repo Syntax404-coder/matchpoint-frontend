@@ -485,6 +485,14 @@ const onFileChange = async (e) => {
   uploadingPhoto.value = true
   photoError.value = ''
 
+  console.log('Selected file:', { name: file.name, type: file.type, size: file.size })
+  
+  if (!file.type.startsWith('image/')) {
+    photoError.value = 'Invalid file type. Please upload an image (JPG, PNG).'
+    uploadingPhoto.value = false
+    return
+  }
+
   try {
     // Check if it's the first photo to set as primary
     const isFirstUpload = (authUser.value?.photos || []).length === 0
@@ -508,7 +516,7 @@ const onFileChange = async (e) => {
     }
   } catch (e) {
     console.error('Upload error:', e)
-    photoError.value = 'Failed to upload photo'
+    photoError.value = e.message || 'Failed to upload photo'
   } finally {
     uploadingPhoto.value = false
     // Reset input

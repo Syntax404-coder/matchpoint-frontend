@@ -1,7 +1,8 @@
-import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client/core'
+import { ApolloClient, InMemoryCache } from '@apollo/client/core'
+import { createUploadLink } from 'apollo-upload-client'
 import { setContext } from '@apollo/client/link/context'
 
-const httpLink = createHttpLink({
+const httpLink = createUploadLink({
   uri: import.meta.env.VITE_API_URL || 'http://localhost:3000/graphql',
 })
 

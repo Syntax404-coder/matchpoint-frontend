@@ -478,13 +478,6 @@ const saveProfile = async () => {
 }
 
 /* ---------------- PHOTO UPLOAD ---------------- */
-const fileToBase64 = (file) =>
-  new Promise((resolve) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result.split(',')[1])
-    reader.readAsDataURL(file)
-  })
-
 const onFileChange = async (e) => {
   const file = e.target.files[0]
   if (!file) return
@@ -493,13 +486,12 @@ const onFileChange = async (e) => {
   photoError.value = ''
 
   try {
-    const base64 = await fileToBase64(file)
     // Check if it's the first photo to set as primary
     const isFirstUpload = (authUser.value?.photos || []).length === 0
 
     const { data } = await uploadPhotoMutation({
       input: {
-        image: base64,
+        image: file, // Pass File object directly
         isPrimary: isFirstUpload
       }
     })

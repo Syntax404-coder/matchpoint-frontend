@@ -8,10 +8,15 @@
         <span class="text-3xl text-white" style="font-family: 'Satisfy', cursive;">MatchPoint</span>
       </div>
       
-      <!-- Optional: Decorative elements -->
+      <!-- Decorative elements -->
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
         <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
         <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl"></div>
+      </div>
+      
+      <!-- Phone Mockup -->
+      <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <img src="/phone-mockup.png" alt="" class="w-[400px] h-auto drop-shadow-2xl opacity-90 transform rotate-[-5deg] hover:rotate-0 transition-transform duration-500" />
       </div>
     </div>
 

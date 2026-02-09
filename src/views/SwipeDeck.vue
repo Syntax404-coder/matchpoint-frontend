@@ -6,12 +6,15 @@
         <img src="/icon.png" alt="MatchPoint Logo" class="w-10 h-10 object-contain drop-shadow-md" />
       </div>
       
-      <div class="flex items-center gap-3">
-        <router-link to="/matches" class="w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-white hover:bg-white/20 transition-all shadow-lg group">
-          <MessageCircle class="w-6 h-6 group-hover:scale-110 transition-transform" />
+      <div class="nav">
+        <button @click="showEditProfileModal = true" class="icon-btn" title="Edit Profile">
+          <Edit :size="24" />
+        </button>
+        <router-link to="/matches" class="icon-btn" title="Messages">
+          <MessageCircle :size="24" />
         </router-link>
-        <button @click="logout" class="w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all shadow-lg group">
-          <LogOut class="w-5 h-5 group-hover:scale-110 transition-transform" />
+        <button @click="logout" class="icon-btn" title="Logout">
+          <LogOut :size="24" />
         </button>
       </div>
     </header>
@@ -121,16 +124,47 @@
         </div>
       </div>
     </transition>
+
+    <!-- Edit Profile Modal -->
+    <div v-if="showEditProfileModal" class="modal" @click="showEditProfileModal = false">
+      <div class="modal-content profile-modal" @click.stop>
+        <h2>Edit Profile</h2>
+        <form @submit.prevent="saveProfile" class="profile-form">
+          <div class="form-group">
+            <label>First Name</label>
+            <input v-model="profileForm.firstName" placeholder="First Name" required />
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input v-model="profileForm.lastName" placeholder="Last Name" required />
+          </div>
+          <div class="form-group">
+            <label>Bio</label>
+            <textarea v-model="profileForm.bio" placeholder="Tell us about yourself"></textarea>
+          </div>
+          <div class="form-group">
+            <label>City</label>
+            <input v-model="profileForm.city" placeholder="City" required />
+          </div>
+          
+          <div class="modal-actions">
+            <button type="button" @click="showEditProfileModal = false" class="cancel-btn">Cancel</button>
+            <button type="submit" :disabled="updating">Save Changes</button>
+          </div>
+          <p v-if="updateError" class="error">{{ updateError }}</p>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useQuery, useMutation } from '@vue/apollo-composable'
 import { gql } from '@apollo/client/core'
 import { useAuth } from '@/composables/useAuth'
-import { MessageCircle, LogOut, X, Heart, MapPin, Loader2, Users } from 'lucide-vue-next'
+import { MessageCircle, LogOut, X, Heart, MapPin, Loader2, Users, Edit } from 'lucide-vue-next'
 
 /* ---------------- ROUTER & AUTH ---------------- */
 const router = useRouter()
@@ -146,7 +180,42 @@ const startX = ref(0)
 const currentX = ref(0)
 const dragging = ref(false)
 
+// Edit Profile State
+const showEditProfileModal = ref(false)
+const profileForm = reactive({
+  firstName: '',
+  lastName: '',
+  bio: '',
+  city: ''
+})
+const updateError = ref('')
+
+// Initialize form when modal opens
+watch(showEditProfileModal, (newVal) => {
+  if (newVal && authUser.value) {
+    profileForm.firstName = authUser.value.firstName || ''
+    profileForm.lastName = authUser.value.lastName || ''
+    profileForm.bio = authUser.value.bio || ''
+    profileForm.city = authUser.value.city || ''
+  }
+})
+
 /* ---------------- GRAPHQL ---------------- */
+const UPDATE_PROFILE = gql`
+  mutation UpdateProfile($firstName: String, $lastName: String, $bio: String, $city: String) {
+    updateProfile(firstName: $firstName, lastName: $lastName, bio: $bio, city: $city) {
+      user {
+        id
+        firstName
+        lastName
+        bio
+        city
+      }
+      errors
+    }
+  }
+`
+
 const SWIPE_DECK = gql`
   query SwipeDeck($limit: Int!) {
     swipeDeck(limit: $limit) {
@@ -192,6 +261,7 @@ const { result, loading, refetch } = useQuery(
 )
 
 const { mutate: createSwipe } = useMutation(CREATE_SWIPE)
+const { mutate: updateProfile, loading: updating } = useMutation(UPDATE_PROFILE)
 
 /* ------ SWIPE FUNCTION --------- */
 const onStart = (e) => {
@@ -314,6 +384,28 @@ const logout = () => {
   localStorage.removeItem('token')
   router.push('/login')
 }
+
+const saveProfile = async () => {
+  updateError.value = ''
+  try {
+    const { data } = await updateProfile({
+      firstName: profileForm.firstName,
+      lastName: profileForm.lastName,
+      bio: profileForm.bio,
+      city: profileForm.city
+    })
+    if (data?.updateProfile?.errors?.length > 0) {
+      updateError.value = data.updateProfile.errors.join(', ')
+    } else {
+      // Success
+      showEditProfileModal.value = false
+      window.location.reload() // Refresh to show updated data
+    }
+  } catch (e) {
+    console.error('Update error:', e)
+    updateError.value = 'Failed to update profile'
+  }
+}
 </script>
 
 <style scoped>
@@ -325,5 +417,113 @@ const logout = () => {
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
+}
+
+/* ICON BUTTONS with Glassmorphism */
+.icon-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #3B82F6;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+.icon-btn:hover {
+  background: rgba(59, 130, 246, 0.2);
+  color: #2563EB;
+  transform: translateY(-2px);
+}
+.nav {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* MODAL STYLES */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+.modal-content {
+  background: #fff;
+  border-radius: 24px;
+  padding: 24px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  color: #333;
+}
+.profile-modal {
+  width: 90%;
+  text-align: left;
+  max-width: 500px;
+}
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.form-group label {
+  font-weight: 600;
+  color: #444;
+}
+.form-group input,
+.form-group textarea {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  font-family: inherit;
+}
+.form-group textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+}
+.cancel-btn {
+  background: #f0f0f0 !important;
+  color: #666 !important;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+.modal-actions button[type="submit"] {
+  background: #000;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+.error {
+  color: #d32f2f;
+  margin-top: 10px;
+  font-size: 14px;
 }
 </style>

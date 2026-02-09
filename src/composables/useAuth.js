@@ -8,6 +8,15 @@ const CURRENT_USER = gql`
       id
       email
       firstName
+      lastName
+      bio
+      city
+      photos {
+        id
+        url
+        position
+        isPrimary
+      }
       role
     }
   }
@@ -25,7 +34,7 @@ export function useAuth() {
     }
   )
 
-  
+
   const currentUser = computed(() => result.value?.currentUser || null)
   console.log(currentUser)
 

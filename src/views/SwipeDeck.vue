@@ -146,6 +146,23 @@
             <label>City</label>
             <input v-model="profileForm.city" placeholder="City" required />
           </div>
+
+          <!-- Photos Section -->
+          <div class="form-group">
+            <label>Photos</label>
+            <div class="photo-grid">
+              <div v-for="photo in authUser?.photos || []" :key="photo.id" class="photo-item">
+                <img :src="photo.url" />
+              </div>
+              
+              <label class="photo-upload-btn" :class="{ 'uploading': uploadingPhoto }">
+                <Loader2 v-if="uploadingPhoto" class="w-6 h-6 animate-spin text-cyan-500" />
+                <UploadCloud v-else class="w-6 h-6 text-gray-400" />
+                <input type="file" class="hidden" accept="image/*" @change="onFileChange" :disabled="uploadingPhoto" />
+              </label>
+            </div>
+            <p v-if="photoError" class="error text-xs">{{ photoError }}</p>
+          </div>
           
           <div class="modal-actions">
             <button type="button" @click="showEditProfileModal = false" class="cancel-btn">Cancel</button>
@@ -164,7 +181,7 @@ import { useRouter } from 'vue-router'
 import { useQuery, useMutation } from '@vue/apollo-composable'
 import { gql } from '@apollo/client/core'
 import { useAuth } from '@/composables/useAuth'
-import { MessageCircle, LogOut, X, Heart, MapPin, Loader2, Users, Edit } from 'lucide-vue-next'
+import { MessageCircle, LogOut, X, Heart, MapPin, Loader2, Users, Edit, UploadCloud, Image as ImageIcon } from 'lucide-vue-next'
 
 /* ---------------- ROUTER & AUTH ---------------- */
 const router = useRouter()
@@ -189,6 +206,8 @@ const profileForm = reactive({
   city: ''
 })
 const updateError = ref('')
+const uploadingPhoto = ref(false)
+const photoError = ref('')
 
 // Initialize form when modal opens
 watch(showEditProfileModal, (newVal) => {
@@ -210,6 +229,20 @@ const UPDATE_PROFILE = gql`
         lastName
         bio
         city
+      }
+      errors
+    }
+  }
+`
+
+const UPLOAD_PHOTO = gql`
+  mutation UploadPhoto($input: UploadPhotoInput!) {
+    uploadPhoto(input: $input) {
+      photo {
+        id
+        url
+        position
+        isPrimary
       }
       errors
     }
@@ -262,6 +295,7 @@ const { result, loading, refetch } = useQuery(
 
 const { mutate: createSwipe } = useMutation(CREATE_SWIPE)
 const { mutate: updateProfile, loading: updating } = useMutation(UPDATE_PROFILE)
+const { mutate: uploadPhotoMutation } = useMutation(UPLOAD_PHOTO)
 
 /* ------ SWIPE FUNCTION --------- */
 const onStart = (e) => {
@@ -406,6 +440,51 @@ const saveProfile = async () => {
     updateError.value = 'Failed to update profile'
   }
 }
+
+/* ---------------- PHOTO UPLOAD ---------------- */
+const fileToBase64 = (file) =>
+  new Promise((resolve) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result.split(',')[1])
+    reader.readAsDataURL(file)
+  })
+
+const onFileChange = async (e) => {
+  const file = e.target.files[0]
+  if (!file) return
+
+  uploadingPhoto.value = true
+  photoError.value = ''
+
+  try {
+    const base64 = await fileToBase64(file)
+    // Check if it's the first photo to set as primary
+    const isFirstUpload = (authUser.value?.photos || []).length === 0
+
+    const { data } = await uploadPhotoMutation({
+      input: {
+        image: base64,
+        isPrimary: isFirstUpload
+      }
+    })
+
+    if (data?.uploadPhoto?.errors?.length) {
+      photoError.value = data.uploadPhoto.errors.join(', ')
+    } else {
+      // Success - refetch auth user to update photos list
+      const { useAuth } = await import('@/composables/useAuth')
+      const { refetch } = useAuth()
+      await refetch()
+    }
+  } catch (e) {
+    console.error('Upload error:', e)
+    photoError.value = 'Failed to upload photo'
+  } finally {
+    uploadingPhoto.value = false
+    // Reset input
+    e.target.value = ''
+  }
+}
 </script>
 
 <style scoped>
@@ -525,5 +604,43 @@ const saveProfile = async () => {
   color: #d32f2f;
   margin-top: 10px;
   font-size: 14px;
+}
+
+/* Photo Grid Styles */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 8px;
+}
+.photo-item {
+  aspect-ratio: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  background: #f0f0f0;
+}
+.photo-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.photo-upload-btn {
+  aspect-ratio: 1;
+  border-radius: 12px;
+  border: 2px dashed #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.photo-upload-btn:hover {
+  border-color: #3B82F6;
+  background: #f0f9ff;
+}
+.photo-upload-btn.uploading {
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 </style>

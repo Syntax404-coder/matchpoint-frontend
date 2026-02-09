@@ -26,7 +26,7 @@
 
       <!-- Card 1: Main Form -->
       <div class="w-full max-w-sm bg-white/5 border border-white/10 rounded-xl p-6 mb-4 shadow-lg flex-shrink-0">
-        <h1 class="text-xl font-bold text-white text-center mb-1">Create Account</h1>
+        <h1 class="text-2xl text-white text-center mb-1" style="font-family: 'Satisfy', cursive;">Create Account</h1>
         <p class="text-gray-400 text-center text-sm mb-5">Join MatchPoint today</p>
 
         <form @submit.prevent="handleRegister" class="space-y-3">
@@ -158,7 +158,7 @@
               :disabled="!form.province"
               class="w-full bg-gray-900 text-white border border-gray-700 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors disabled:opacity-50"
             >
-              <option value="" disabled>City</option>
+              <option value="" disabled>City/Municipality</option>
               <option v-for="city in availableCities" :key="city" :value="city">{{ city }}</option>
             </select>
           </div>

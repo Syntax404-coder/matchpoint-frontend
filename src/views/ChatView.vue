@@ -71,9 +71,9 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
-import { useQuery, useMutation, useSubscription } from '@vue/apollo-composable'
+import { useQuery, useMutation } from '@vue/apollo-composable'
 import { gql } from '@apollo/client/core'
 import { ArrowLeft, Send } from 'lucide-vue-next'
 
@@ -82,23 +82,13 @@ const newMessage = ref('')
 const sending = ref(false)
 const messagesContainer = ref(null)
 const currentUserId = ref(null)
+let pollingInterval = null
 
 const matchId = route.params.matchId
 const otherUserId = route.query.userId
 const otherUserName = route.query.name
 
 /* ---------------- GRAPHQL ---------------- */
-const NEW_MESSAGE_SUBSCRIPTION = gql`
-  subscription OnNewMessage($matchId: ID!) {
-    newMessage(matchId: $matchId) {
-      id
-      content
-      sender { id firstName lastName primaryPhotoUrl }
-      receiver { id firstName lastName primaryPhotoUrl }
-      createdAt
-    }
-  }
-`
 
 const CONVERSATION_MESSAGES = gql`
   query ConversationMessages($matchId: ID!) {
@@ -151,13 +141,7 @@ const otherUserDetails = computed(() => {
   }
 })
 
-const { result: subResult } = useSubscription(NEW_MESSAGE_SUBSCRIPTION, { matchId })
 
-watch(subResult, (val) => {
-  if (!val) return
-  messages.value.push(val.newMessage)
-  scrollToBottom()
-})
 
 const { result, refetch } = useQuery(
   CONVERSATION_MESSAGES, 
@@ -238,5 +222,22 @@ watch(result, (val) => {
 
 onMounted(() => {
   scrollToBottom()
+  // Start polling for new messages every 3 seconds
+  pollingInterval = setInterval(async () => {
+    const previousCount = messages.value.length
+    await refetch()
+    // Scroll to bottom only if new messages arrived
+    if (messages.value.length > previousCount) {
+      scrollToBottom()
+    }
+  }, 3000)
+})
+
+onUnmounted(() => {
+  // Clean up polling interval when leaving the chat
+  if (pollingInterval) {
+    clearInterval(pollingInterval)
+    pollingInterval = null
+  }
 })
 </script>

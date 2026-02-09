@@ -82,6 +82,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMutation, useQuery } from '@vue/apollo-composable'
 import { gql } from '@apollo/client/core'
+import { apolloClient } from '../apollo'
 import { UploadCloud, Image, Loader2, Star } from 'lucide-vue-next'
 import GlassCard from '../components/ui/GlassCard.vue'
 import GlassButton from '../components/ui/GlassButton.vue'
@@ -120,10 +121,11 @@ const CURRENT_USER = gql`
 `
 
 const { result, refetch } = useQuery(CURRENT_USER, null, {
-  fetchPolicy: 'network-only'
+  fetchPolicy: 'network-only',
+  client: apolloClient
 })
 
-const { mutate: uploadPhotoMutation } = useMutation(UPLOAD_PHOTO)
+const { mutate: uploadPhotoMutation } = useMutation(UPLOAD_PHOTO, { client: apolloClient })
 
 const photos = computed(() => result.value?.currentUser?.photos || [])
 
@@ -131,12 +133,6 @@ const onFileChange = (e) => {
   selectedFile.value = e.target.files[0] || null
 }
 
-const fileToBase64 = (file) =>
-  new Promise((resolve) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result.split(',')[1])
-    reader.readAsDataURL(file)
-  })
 
 const uploadPhoto = async () => {
   if (!selectedFile.value) return
@@ -145,12 +141,11 @@ const uploadPhoto = async () => {
   error.value = null
 
   try {
-    const base64 = await fileToBase64(selectedFile.value)
     const isFirstUpload = photos.value.length === 0
 
     const { data } = await uploadPhotoMutation({
       input: {
-        image: base64,
+        image: selectedFile.value,
         isPrimary: isFirstUpload
       }
     })

@@ -151,8 +151,16 @@
           <div class="form-group">
             <label>Photos</label>
             <div class="photo-grid">
-              <div v-for="photo in authUser?.photos || []" :key="photo.id" class="photo-item">
-                <img :src="photo.url" />
+              <div v-for="photo in authUser?.photos || []" :key="photo.id" class="photo-item group">
+                <img :src="getPhotoUrl(photo.url)" />
+                <button 
+                  type="button" 
+                  @click.stop="deletePhoto(photo.id)" 
+                  class="delete-photo-btn"
+                  title="Delete Photo"
+                >
+                  <X :size="14" />
+                </button>
               </div>
               
               <label class="photo-upload-btn" :class="{ 'uploading': uploadingPhoto }">
@@ -249,6 +257,15 @@ const UPLOAD_PHOTO = gql`
   }
 `
 
+const DELETE_PHOTO = gql`
+  mutation DeletePhoto($id: ID!) {
+    deletePhoto(id: $id) {
+      photo { id }
+      errors
+    }
+  }
+`
+
 const SWIPE_DECK = gql`
   query SwipeDeck($limit: Int!) {
     swipeDeck(limit: $limit) {
@@ -296,6 +313,7 @@ const { result, loading, refetch } = useQuery(
 const { mutate: createSwipe } = useMutation(CREATE_SWIPE)
 const { mutate: updateProfile, loading: updating } = useMutation(UPDATE_PROFILE)
 const { mutate: uploadPhotoMutation } = useMutation(UPLOAD_PHOTO)
+const { mutate: deletePhotoMutation } = useMutation(DELETE_PHOTO)
 
 /* ------ SWIPE FUNCTION --------- */
 const onStart = (e) => {
@@ -487,6 +505,35 @@ const onFileChange = async (e) => {
     e.target.value = ''
   }
 }
+
+const getPhotoUrl = (url) => {
+  if (!url) return ''
+  if (url.startsWith('http')) return url
+  // Get base URL from VITE_API_URL (remove /graphql)
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/graphql'
+  const baseUrl = apiUrl.replace(/\/graphql\/?$/, '')
+  return `${baseUrl}${url}`
+}
+
+const deletePhoto = async (photoId) => {
+  if (!confirm('Are you sure you want to delete this photo?')) return
+
+  try {
+    const { data } = await deletePhotoMutation({ id: photoId })
+    
+    if (data?.deletePhoto?.errors?.length) {
+      photoError.value = data.deletePhoto.errors.join(', ')
+    } else {
+      // Success - refetch
+      const { useAuth } = await import('@/composables/useAuth')
+      const { refetch } = useAuth()
+      await refetch()
+    }
+  } catch (e) {
+    console.error('Delete error:', e)
+    photoError.value = 'Failed to delete photo'
+  }
+}
 </script>
 
 <style scoped>
@@ -644,5 +691,30 @@ const onFileChange = async (e) => {
 .photo-upload-btn.uploading {
   cursor: not-allowed;
   opacity: 0.7;
+}
+
+.delete-photo-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s;
+}
+.photo-item:hover .delete-photo-btn {
+  opacity: 1;
+}
+.delete-photo-btn:hover {
+  background: #ef4444;
+  transform: scale(1.1);
 }
 </style>

@@ -208,7 +208,7 @@
 
       <!-- Card 2: Login Link -->
       <div class="w-full max-w-sm bg-white/5 border border-white/10 rounded-xl p-5 text-center shadow-lg flex-shrink-0">
-        <p class="text-gray-400 text-sm" style="font-family: 'Satisfy', cursive;">
+        <p class="text-gray-400 text-sm">
           Already have an account? 
           <router-link to="/login" class="text-cyan-400 font-semibold hover:underline">
             Log in

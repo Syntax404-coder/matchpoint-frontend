@@ -82,7 +82,7 @@
       <div class="w-full max-w-sm bg-white/5 border border-white/10 rounded-xl p-6 text-center shadow-lg">
         <p class="text-gray-400 text-sm">
           Don't have an account? 
-          <router-link to="/register" class="text-cyan-400 font-semibold hover:underline">
+          <router-link to="/register" class="text-cyan-400 font-semibold hover:underline" style="font-family: 'Satisfy', cursive;">
             Sign up
           </router-link>
         </p>

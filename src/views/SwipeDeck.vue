@@ -163,7 +163,11 @@
                 </button>
               </div>
               
-              <label class="photo-upload-btn" :class="{ 'uploading': uploadingPhoto }">
+              <label 
+                v-if="canUpload"
+                class="photo-upload-btn" 
+                :class="{ 'uploading': uploadingPhoto }"
+              >
                 <Loader2 v-if="uploadingPhoto" class="w-6 h-6 animate-spin text-cyan-500" />
                 <UploadCloud v-else class="w-6 h-6 text-gray-400" />
                 <input type="file" class="hidden" accept="image/*" @change="onFileChange" :disabled="uploadingPhoto" />
@@ -198,6 +202,7 @@ const { currentUser: authUser } = useAuth()
 /* ---------------- STATE ---------------- */
 const currentIndex = ref(0)
 const photoIndex = ref(0)
+const MAX_PHOTOS = 5
 const showMatchModal = ref(false)
 const matchedUser = ref(null)
 
@@ -375,6 +380,11 @@ const deckUser = computed(() => {
     age: user.age || '',
     province: user.province || ''
   }
+})
+
+// Check if user can upload more photos
+const canUpload = computed(() => {
+  return (authUser.value?.photos || []).length < MAX_PHOTOS
 })
 
 /* Reset gallery when user changes */

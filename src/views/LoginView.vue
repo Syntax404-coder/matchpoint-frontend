@@ -12,11 +12,23 @@
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
         <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
         <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl"></div>
+        
+        <!-- Floating Hearts -->
+        <div class="absolute top-[15%] left-[10%] text-4xl animate-float-slow opacity-60">💕</div>
+        <div class="absolute top-[35%] left-[5%] text-3xl animate-float opacity-50">💙</div>
+        <div class="absolute bottom-[20%] left-[15%] text-5xl animate-float-slow opacity-40">💗</div>
+        <div class="absolute top-[20%] right-[35%] text-3xl animate-float opacity-50">💜</div>
+        <div class="absolute bottom-[30%] right-[40%] text-4xl animate-float-slow opacity-60">💖</div>
+        
+        <!-- Sparkles -->
+        <div class="absolute top-[10%] left-[30%] text-2xl animate-pulse opacity-70">✨</div>
+        <div class="absolute top-[50%] left-[8%] text-xl animate-pulse opacity-60">⭐</div>
+        <div class="absolute bottom-[15%] left-[35%] text-2xl animate-pulse opacity-50">✨</div>
       </div>
       
       <!-- Phone Mockup -->
       <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <img src="/phone-mockup.png" alt="" class="w-[400px] h-auto drop-shadow-2xl opacity-90 transform rotate-[-5deg] hover:rotate-0 transition-transform duration-500" />
+        <img src="/phone-mockup-removebg-preview.png" alt="" class="w-[550px] h-auto drop-shadow-2xl transform rotate-[-5deg]" />
       </div>
     </div>
 

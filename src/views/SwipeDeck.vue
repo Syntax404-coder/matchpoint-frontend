@@ -229,8 +229,8 @@ watch(showEditProfileModal, (newVal) => {
 
 /* ---------------- GRAPHQL ---------------- */
 const UPDATE_PROFILE = gql`
-  mutation UpdateProfile($input: UpdateProfileInput!) {
-    updateProfile(input: $input) {
+  mutation UpdateProfile($firstName: String, $lastName: String, $bio: String, $city: String) {
+    updateProfile(firstName: $firstName, lastName: $lastName, bio: $bio, city: $city) {
       user {
         id
         firstName
@@ -441,19 +441,16 @@ const saveProfile = async () => {
   updateError.value = ''
   try {
     const { data } = await updateProfile({
-      input: {
-        firstName: profileForm.firstName,
-        lastName: profileForm.lastName,
-        bio: profileForm.bio,
-        city: profileForm.city
-      }
+      firstName: profileForm.firstName,
+      lastName: profileForm.lastName,
+      bio: profileForm.bio,
+      city: profileForm.city
     })
     if (data?.updateProfile?.errors?.length > 0) {
       updateError.value = data.updateProfile.errors.join(', ')
     } else {
-      // Success
       showEditProfileModal.value = false
-      window.location.reload() // Refresh to show updated data
+      window.location.reload() // Simple reload to reflect changes
     }
   } catch (e) {
     console.error('Update error:', e)
@@ -547,7 +544,7 @@ const deletePhoto = async (photoId) => {
   opacity: 0;
 }
 
-/* ICON BUTTONS with Glassmorphism */
+/* Glassmorphism Icon Buttons */
 .icon-btn {
   width: 44px;
   height: 44px;
@@ -573,8 +570,7 @@ const deletePhoto = async (photoId) => {
   gap: 12px;
   align-items: center;
 }
-
-/* MODAL STYLES */
+/* Modal Stying */
 .modal {
   position: fixed;
   inset: 0;
@@ -591,15 +587,15 @@ const deletePhoto = async (photoId) => {
   border-radius: 24px;
   padding: 24px;
   width: 90%;
-  max-width: 400px;
-  text-align: center;
+  max-width: 500px;
+  text-align: left;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   color: #333;
 }
 .profile-modal {
   width: 90%;
-  text-align: left;
   max-width: 500px;
+  text-align: left;
 }
 .profile-form {
   display: flex;

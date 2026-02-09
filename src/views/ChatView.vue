@@ -95,8 +95,8 @@ const CONVERSATION_MESSAGES = gql`
     conversationMessages(matchId: $matchId) {
       id
       content
-      sender { id firstName lastName primaryPhotoUrl}
-      receiver { id firstName lastName primaryPhotoUrl }
+      sender { id firstName lastName gender primaryPhotoUrl }
+      receiver { id firstName lastName gender primaryPhotoUrl }
       read
       createdAt
     }
@@ -132,12 +132,14 @@ const otherUserDetails = computed(() => {
   }
 
   const msg = messages.value[0]
-  const user = msg.sender.id === currentUserId.value ? msg.receiver : msg.sender
+  // Use otherUserId from route query - convert to string for safe comparison
+  // If sender is the other user, use sender; otherwise use receiver
+  const user = String(msg.sender.id) === String(otherUserId) ? msg.sender : msg.receiver
 
   return {
     fullName: `${user.firstName} ${user.lastName}`,
     photoUrl: user.primaryPhotoUrl,
-    gender: user.gender // Assuming gender is available or we fallback
+    gender: user.gender
   }
 })
 

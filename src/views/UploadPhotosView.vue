@@ -2,8 +2,8 @@
   <div class="min-h-screen flex flex-col items-center justify-center p-6 relative z-10 py-12">
     <GlassCard class="w-full max-w-lg text-center">
       <!-- Logo -->
-      <div class="mb-6 inline-block p-3 bg-white/5 rounded-full backdrop-blur-md border border-white/10 shadow-lg">
-        <img src="/icon.png" alt="MatchPoint Logo" class="w-16 h-16 object-contain drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+      <div class="mb-6 inline-block p-3 rounded-2xl backdrop-blur-md border border-white/10 shadow-lg">
+        <img src="/icon.png" alt="MatchPoint Logo" class="w-16 h-16 object-contain drop-shadow-[0_0_10px_rgba(59,130,246,0.5)] rounded-xl" />
       </div>
 
       <h1 class="text-3xl font-bold text-white mb-2 tracking-wide">Upload Photos</h1>

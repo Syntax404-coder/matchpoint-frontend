@@ -2,8 +2,8 @@
   <div class="min-h-screen flex flex-col relative overflow-hidden pb-safe">
     <!-- Header -->
     <header class="flex justify-between items-center px-6 py-4 z-20 sticky top-0">
-      <div class="bg-white/10 backdrop-blur-md rounded-2xl p-2 border border-white/10 shadow-lg">
-        <img src="/icon.png" alt="MatchPoint Logo" class="w-10 h-10 object-contain drop-shadow-md" />
+      <div class="backdrop-blur-md rounded-2xl p-2 border border-white/10 shadow-lg">
+        <img src="/icon.png" alt="MatchPoint Logo" class="w-10 h-10 object-contain drop-shadow-md rounded-xl" />
       </div>
       
       <div class="nav">

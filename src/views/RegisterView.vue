@@ -4,8 +4,8 @@
     <div class="hidden md:flex md:w-3/5 lg:w-2/3 relative bg-gradient-to-br from-gray-900 via-blue-900 to-black">
       <!-- Logo - Top Left -->
       <div class="absolute top-8 left-12 flex items-center gap-3">
-        <img src="/icon.png" alt="MatchPoint" class="w-12 h-12 object-contain drop-shadow-lg" />
-        <span class="text-2xl font-bold text-white tracking-wide">MatchPoint</span>
+        <img src="/icon.png" alt="MatchPoint" class="w-12 h-12 object-contain drop-shadow-lg rounded-xl" />
+        <span class="text-3xl text-white" style="font-family: 'Satisfy', cursive;">MatchPoint</span>
       </div>
       
       <!-- Decorative elements -->
@@ -20,8 +20,8 @@
       
       <!-- Mobile Logo -->
       <div class="md:hidden flex items-center gap-3 mb-6 flex-shrink-0">
-        <img src="/icon.png" alt="MatchPoint" class="w-10 h-10 object-contain" />
-        <span class="text-xl font-bold text-white">MatchPoint</span>
+        <img src="/icon.png" alt="MatchPoint" class="w-10 h-10 object-contain rounded-xl" />
+        <span class="text-2xl text-white" style="font-family: 'Satisfy', cursive;">MatchPoint</span>
       </div>
 
       <!-- Card 1: Main Form -->

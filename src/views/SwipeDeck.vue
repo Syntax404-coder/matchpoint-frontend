@@ -190,12 +190,14 @@
 <script setup>
 import { ref, computed, watch, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { useQuery, useMutation } from '@vue/apollo-composable'
+import { useQuery, useMutation, provideApolloClient } from '@vue/apollo-composable'
 import { gql } from '@apollo/client/core'
+import { apolloClient } from '@/apollo'
 import { useAuth } from '@/composables/useAuth'
 import { MessageCircle, LogOut, X, Heart, MapPin, Loader2, Users, Edit, UploadCloud, Image as ImageIcon } from 'lucide-vue-next'
 
 /* ---------------- ROUTER & AUTH ---------------- */
+provideApolloClient(apolloClient) // Explicitly provide client
 const router = useRouter()
 const { currentUser: authUser, refetch: refetchAuth } = useAuth()
 

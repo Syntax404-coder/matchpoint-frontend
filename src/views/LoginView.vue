@@ -27,7 +27,7 @@
       <!-- Card 1: Main Form -->
       <div class="w-full max-w-sm bg-white/5 border border-white/10 rounded-xl p-8 mb-4 shadow-lg">
         <h1 class="text-3xl text-white text-center mb-2" style="font-family: 'Satisfy', cursive;">Welcome Back</h1>
-        <p class="text-gray-400 text-center text-sm mb-6" style="font-family: 'Satisfy', cursive;">Sign in to continue</p>
+        <p class="text-gray-400 text-center text-sm mb-6">Sign in to continue</p>
 
         <form @submit.prevent="handleLogin" class="space-y-4">
           <!-- Email -->

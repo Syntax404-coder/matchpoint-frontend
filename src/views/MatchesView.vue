@@ -5,7 +5,7 @@
       <router-link to="/deck" class="p-3 bg-white/10 backdrop-blur-md rounded-full border border-white/10 text-white hover:bg-white/20 transition-all shadow-lg group">
         <ArrowLeft class="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
       </router-link>
-      <h1 class="text-3xl font-bold text-white tracking-wide">Messages</h1>
+      <h1 class="text-3xl text-white tracking-wide" style="font-family: 'Satisfy', cursive;">Messages</h1>
     </div>
     
     <!-- Loading -->

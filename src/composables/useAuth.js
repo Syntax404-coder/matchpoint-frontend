@@ -24,6 +24,8 @@ const CURRENT_USER = gql`
 
 import { apolloClient } from '@/apollo'
 
+console.log('useAuth.js: apolloClient is', apolloClient)
+
 export function useAuth() {
   const token = computed(() => localStorage.getItem('token'))
 

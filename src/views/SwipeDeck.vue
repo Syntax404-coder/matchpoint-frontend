@@ -193,6 +193,7 @@ import { useRouter } from 'vue-router'
 import { useQuery, useMutation, provideApolloClient } from '@vue/apollo-composable'
 import { gql } from '@apollo/client/core'
 import { apolloClient } from '@/apollo'
+console.log('SwipeDeck.vue: apolloClient is', apolloClient)
 import { useAuth } from '@/composables/useAuth'
 import { MessageCircle, LogOut, X, Heart, MapPin, Loader2, Users, Edit, UploadCloud, Image as ImageIcon } from 'lucide-vue-next'
 

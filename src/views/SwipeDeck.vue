@@ -197,7 +197,7 @@ import { MessageCircle, LogOut, X, Heart, MapPin, Loader2, Users, Edit, UploadCl
 
 /* ---------------- ROUTER & AUTH ---------------- */
 const router = useRouter()
-const { currentUser: authUser } = useAuth()
+const { currentUser: authUser, refetch: refetchAuth } = useAuth()
 
 /* ---------------- STATE ---------------- */
 const currentIndex = ref(0)
@@ -510,9 +510,7 @@ const onFileChange = async (e) => {
     } else {
       console.log('Upload success:', data.uploadPhoto)
       // Success - refetch auth user to update photos list
-      const { useAuth } = await import('@/composables/useAuth')
-      const { refetch } = useAuth()
-      await refetch()
+      await refetchAuth()
     }
   } catch (e) {
     console.error('Upload error:', e)
@@ -554,9 +552,7 @@ const deletePhoto = async (photoId) => {
       // Update local state immediately if needed, or rely on refetch
       // The backend returns the updated user, so we could update authUser directly
       // but refetch is safer for consistency across the app
-      const { useAuth } = await import('@/composables/useAuth')
-      const { refetch } = useAuth()
-      await refetch()
+      await refetchAuth()
     }
   } catch (e) {
     console.error('Delete error:', e)

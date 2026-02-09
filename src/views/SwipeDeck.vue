@@ -498,8 +498,10 @@ const onFileChange = async (e) => {
     })
 
     if (data?.uploadPhoto?.errors?.length) {
+      console.error('Upload GraphQL errors:', data.uploadPhoto.errors)
       photoError.value = data.uploadPhoto.errors.join(', ')
     } else {
+      console.log('Upload success:', data.uploadPhoto)
       // Success - refetch auth user to update photos list
       const { useAuth } = await import('@/composables/useAuth')
       const { refetch } = useAuth()
@@ -516,12 +518,17 @@ const onFileChange = async (e) => {
 }
 
 const getPhotoUrl = (url) => {
-  if (!url) return ''
+  if (!url) {
+    console.warn('getPhotoUrl called with empty url')
+    return ''
+  }
   if (url.startsWith('http')) return url
   // Get base URL from VITE_API_URL (remove /graphql)
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/graphql'
   const baseUrl = apiUrl.replace(/\/graphql\/?$/, '')
-  return `${baseUrl}${url}`
+  const fullUrl = `${baseUrl}${url}`
+  console.log('getPhotoUrl transformed:', { original: url, full: fullUrl })
+  return fullUrl
 }
 
 const deletePhoto = async (photoId) => {
@@ -529,12 +536,14 @@ const deletePhoto = async (photoId) => {
 
   try {
     const { data } = await deletePhotoMutation({ 
-      input: { id: photoId } 
+      input: { photoId: photoId } 
     })
     
     if (data?.deletePhoto?.errors?.length) {
+      console.error('Delete GraphQL errors:', data.deletePhoto.errors)
       photoError.value = data.deletePhoto.errors.join(', ')
     } else {
+      console.log('Delete success:', data.deletePhoto)
       // Success - refetch
       const { useAuth } = await import('@/composables/useAuth')
       const { refetch } = useAuth()

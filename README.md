@@ -1,24 +1,43 @@
-# README
+# MatchPoint Frontend - My Setup
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+This is how I run the MatchPoint frontend locally on my machine.
 
-Things you may want to cover:
+## Prerequisites
 
-- Ruby version
+I ensure that **Node.js** is installed on my system.
 
-- System dependencies
+## Setup
 
-- Configuration
+First, I install the project dependencies by running:
 
-- Database creation
+```sh
+npm install
+```
 
-- Database initialization
+## Running Locally
 
-- How to run the test suite
+To start the development server and work on the project, I run:
 
-- Services (job queues, cache servers, search engines, etc.)
+```sh
+npm run dev
+```
 
-- Deployment instructions
+Once the server starts, I can access the application at `http://localhost:5173` (or the port specified in the terminal output).
 
-- ...
+## Building for Production
+
+When I'm ready to deploy or test the production build, I compile the assets using:
+
+```sh
+npm run build
+```
+
+The built files will be located in the `dist/` directory.
+
+## Linting
+
+To check my code for stylistic issues and potential errors, I use:
+
+```sh
+npm run lint
+```

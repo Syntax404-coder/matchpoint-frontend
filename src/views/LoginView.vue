@@ -5,7 +5,6 @@
       <!-- Logo - Top Left -->
       <div class="absolute top-8 left-12 flex items-center gap-3">
         <img src="/icon.png" alt="MatchPoint" class="w-12 h-12 object-contain drop-shadow-lg rounded-xl" />
-        <span class="text-3xl text-white" style="font-family: 'Satisfy', cursive;">MatchPoint</span>
       </div>
       
       <!-- Decorative elements -->

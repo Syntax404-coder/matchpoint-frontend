@@ -1,4 +1,4 @@
-# MatchPoint Frontend - My Setup
+# MatchPoint Frontend
 
 This is how I run the MatchPoint frontend locally on my machine.
 

@@ -95,14 +95,18 @@
           </div>
           <p v-if="passwordMismatch" class="text-red-400 text-xs">Passwords do not match</p>
 
-          <!-- Birthdate & Gender -->
+            <!-- Birthdate & Gender -->
           <div class="grid grid-cols-2 gap-3">
-            <input 
-              v-model="form.birthdate" 
-              type="date" 
-              required
-              class="w-full bg-gray-900 text-white border border-gray-700 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors"
-            />
+            <div>
+              <input 
+                v-model="form.birthdate" 
+                type="date" 
+                required
+                class="w-full bg-gray-900 text-white border border-gray-700 rounded-sm px-3 py-2.5 text-sm focus:outline-none focus:border-cyan-500 transition-colors"
+                :class="{'border-red-500': isUnderage}"
+              />
+              <p v-if="isUnderage" class="text-red-400 text-xs mt-1">You must be 18+</p>
+            </div>
             <select 
               v-model="form.gender" 
               required
@@ -199,7 +203,7 @@
           <!-- Create Account Button -->
           <button 
             type="submit" 
-            :disabled="loading"
+            :disabled="loading || isUnderage || passwordMismatch"
             class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold py-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             <Loader2 v-if="loading" class="w-5 h-5 animate-spin" />
@@ -315,6 +319,16 @@ const calculateAge = (birthdate) => {
   }
   return age
 }
+
+/**
+ * Real-time validation for age eligibility.
+ * Returns true if a birthdate is selected and the calculated age is less than 18.
+ * Blocks form submission and triggers UI error state.
+ */
+const isUnderage = computed(() => {
+  if (!form.value.birthdate) return false
+  return calculateAge(form.value.birthdate) < 18
+})
 
 /**
  * Form submission handler for User Registration.

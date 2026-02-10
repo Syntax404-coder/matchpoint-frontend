@@ -15,20 +15,20 @@
         
         <!-- Brand Image & Decorations -->
         <div class="absolute inset-0 flex items-center justify-center p-12 pointer-events-none">
-          <div class="relative w-full max-w-md">
+          <div class="relative w-full max-w-2xl">
             
             <!-- Animated Decorations -->
             <!-- Top Right Sparkles -->
-            <Sparkles class="absolute -top-12 -right-12 text-white w-12 h-12 animate-float-slow opacity-80" />
-            <Sparkles class="absolute top-0 -right-20 text-white w-8 h-8 animate-twinkle opacity-60" style="animation-delay: 1s;" />
+            <Sparkles class="absolute -top-12 -right-12 text-white w-24 h-24 animate-float-slow opacity-80" />
+            <Sparkles class="absolute top-0 -right-20 text-white w-16 h-16 animate-twinkle opacity-60" style="animation-delay: 1s;" />
             
             <!-- Bottom Left Sparkles -->
-            <Sparkles class="absolute -bottom-8 -left-12 text-white w-10 h-10 animate-float-medium opacity-70" style="animation-delay: 0.5s;" />
+            <Sparkles class="absolute -bottom-8 -left-12 text-white w-20 h-20 animate-float-medium opacity-70" style="animation-delay: 0.5s;" />
             
             <!-- Floating Hearts -->
-            <Heart class="absolute -top-8 left-12 text-white w-6 h-6 animate-float-fast fill-white/20" style="animation-delay: 1.5s;" />
-            <Heart class="absolute bottom-12 -right-8 text-white w-8 h-8 animate-float-slow fill-white/20" style="animation-delay: 2s;" />
-            <Heart class="absolute top-1/2 -left-16 text-white w-5 h-5 animate-twinkle fill-white" style="animation-delay: 0.8s;" />
+            <Heart class="absolute -top-8 left-12 text-white w-12 h-12 animate-float-fast fill-white/20" style="animation-delay: 1.5s;" />
+            <Heart class="absolute bottom-12 -right-8 text-white w-16 h-16 animate-float-slow fill-white/20" style="animation-delay: 2s;" />
+            <Heart class="absolute top-1/2 -left-16 text-white w-10 h-10 animate-twinkle fill-white" style="animation-delay: 0.8s;" />
 
             <!-- Main Brand Image -->
             <img src="/Brand.png" alt="MatchPoint Brand" class="w-full h-full object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500 relative z-10" />

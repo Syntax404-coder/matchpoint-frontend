@@ -90,10 +90,16 @@ import GlassButton from '../components/ui/GlassButton.vue'
 const router = useRouter()
 provideApolloClient(apolloClient)
 
+// Local state management for file selection and upload status
 const selectedFile = ref(null)
 const uploading = ref(false)
 const error = ref(null)
 
+/**
+ * GraphQL Mutation: UploadPhoto
+ * Handles the server-side processing and storage of the user's photo.
+ * Expects a multipart upload or base64 string depending on the backend implementation.
+ */
 const UPLOAD_PHOTO = gql`
   mutation UploadPhoto($input: UploadPhotoInput!) {
     uploadPhoto(input: $input) {
@@ -108,6 +114,11 @@ const UPLOAD_PHOTO = gql`
   }
 `
 
+/**
+ * GraphQL Query: CurrentUser
+ * Fetches the current user's photos to display the gallery grid.
+ * This is essential for showing the user what they have already uploaded.
+ */
 const CURRENT_USER = gql`
   query CurrentUser {
     currentUser {
@@ -121,6 +132,7 @@ const CURRENT_USER = gql`
   }
 `
 
+// Fetch photos with a network-only policy to ensure fresh data after uploads
 const { result, refetch } = useQuery(CURRENT_USER, null, {
   fetchPolicy: 'network-only',
   client: apolloClient
@@ -128,13 +140,23 @@ const { result, refetch } = useQuery(CURRENT_USER, null, {
 
 const { mutate: uploadPhotoMutation } = useMutation(UPLOAD_PHOTO, { client: apolloClient })
 
+// Computed wrapper for safe access to the photos array
 const photos = computed(() => result.value?.currentUser?.photos || [])
 
+// Handler for file input change event
 const onFileChange = (e) => {
   selectedFile.value = e.target.files[0] || null
 }
 
 
+/**
+ * Orchestrates the photo upload process.
+ * 1. Validates file selection.
+ * 2. Determines if this is the first photo (automatically marks as primary).
+ * 3. Executes the mutation.
+ * 4. Refetches the gallery data on success to update the UI.
+ * 5. Resets the file input for subsequent uploads.
+ */
 const uploadPhoto = async () => {
   if (!selectedFile.value) return
 
@@ -143,6 +165,7 @@ const uploadPhoto = async () => {
 
   try {
     console.log('Starting upload from UploadPhotosView...')
+    // Auto-set primary status for the first uploaded photo
     const isFirstUpload = photos.value.length === 0
     console.log('Payload check:', {
       imageType: selectedFile.value?.constructor?.name,
@@ -160,9 +183,12 @@ const uploadPhoto = async () => {
     if (data.uploadPhoto.errors.length) {
       error.value = data.uploadPhoto.errors.join(', ')
     } else {
+      // Refresh the photo gallery to reflect the new state
       await refetch()
       selectedFile.value = null
-      // Reset file input via DOM (Vue way would be better with key or ref but this works for now)
+      
+      // Reset file input via DOM to clear the selected file name
+      // (Vue ref binding on file input is read-only, so manual reset is required)
       const fileInput = document.querySelector('input[type="file"]')
       if (fileInput) fileInput.value = ''
     }
@@ -173,6 +199,7 @@ const uploadPhoto = async () => {
   }
 }
 
+// Navigation handler: Proceeds to the main application (Deck view)
 const goToDeck = () => {
   if (photos.value.length > 0) {
     router.push('/deck')

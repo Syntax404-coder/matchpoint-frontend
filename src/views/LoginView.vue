@@ -13,12 +13,26 @@
         <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
         <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl"></div>
         
-        <!-- Motto Text -->
-        <div class="absolute inset-0 flex items-center justify-center p-12 text-center pointer-events-none">
-          <h2 class="text-5xl md:text-6xl lg:text-7xl text-white drop-shadow-lg leading-tight" 
-              style="font-family: 'Satisfy', cursive; text-shadow: 0 4px 20px rgba(0,0,0,0.5);">
-            To find a prince,<br>you've got to kiss some toads
-          </h2>
+        <!-- Brand Image & Decorations -->
+        <div class="absolute inset-0 flex items-center justify-center p-12 pointer-events-none">
+          <div class="relative w-full max-w-md">
+            
+            <!-- Animated Decorations -->
+            <!-- Top Right Sparkles -->
+            <Sparkles class="absolute -top-12 -right-12 text-white w-12 h-12 animate-float-slow opacity-80" />
+            <Sparkles class="absolute top-0 -right-20 text-white w-8 h-8 animate-twinkle opacity-60" style="animation-delay: 1s;" />
+            
+            <!-- Bottom Left Sparkles -->
+            <Sparkles class="absolute -bottom-8 -left-12 text-white w-10 h-10 animate-float-medium opacity-70" style="animation-delay: 0.5s;" />
+            
+            <!-- Floating Hearts -->
+            <Heart class="absolute -top-8 left-12 text-white w-6 h-6 animate-float-fast fill-white/20" style="animation-delay: 1.5s;" />
+            <Heart class="absolute bottom-12 -right-8 text-white w-8 h-8 animate-float-slow fill-white/20" style="animation-delay: 2s;" />
+            <Heart class="absolute top-1/2 -left-16 text-white w-5 h-5 animate-twinkle fill-white" style="animation-delay: 0.8s;" />
+
+            <!-- Main Brand Image -->
+            <img src="/Brand.png" alt="MatchPoint Brand" class="w-full h-full object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500 relative z-10" />
+          </div>
         </div>
       </div>
     </div>
@@ -104,15 +118,21 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMutation } from '@vue/apollo-composable'
 import { gql } from '@apollo/client/core'
-import { Eye, EyeOff, Loader2, AlertCircle } from 'lucide-vue-next'
+import { Eye, EyeOff, Loader2, AlertCircle, Sparkles, Heart } from 'lucide-vue-next'
 
 const router = useRouter()
 
+// Reactive state for form handling
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
 const error = ref(null)
 
+/**
+ * GraphQL Mutation: LoginUser
+ * Authenticates the user and returns a JWT token along with user details.
+ * The 'role' field is crucial for determining the post-login redirect destination.
+ */
 const LOGIN_USER = gql`
   mutation LoginUser($input: LoginUserInput!) {
     loginUser(input: $input) {
@@ -125,6 +145,14 @@ const LOGIN_USER = gql`
 
 const { mutate: loginUser, loading } = useMutation(LOGIN_USER)
 
+/**
+ * Handler for the login form submission.
+ * Executes the login mutation and handles the response:
+ * 1. On success: Stores the JWT token in localStorage and redirects based on user role.
+ *    - Admin users -> /admin
+ *    - Standard users -> /deck
+ * 2. On failure: Populates the error state to display feedback to the user.
+ */
 const handleLogin = async () => {
   error.value = null
 
@@ -137,10 +165,13 @@ const handleLogin = async () => {
     })
 
     if (data.loginUser.errors.length) {
+      // Aggregate backend errors for display
       error.value = data.loginUser.errors.join(', ')
     } else {
+      // Persist session token
       localStorage.setItem('token', data.loginUser.token)
       
+      // Role-based Access Control (RBAC) redirection logic
       if (data.loginUser.user.role === 'admin') {
         router.push('/admin')
       } else {
@@ -148,7 +179,36 @@ const handleLogin = async () => {
       }
     }
   } catch (e) {
+    // Catch-all for network or unexpected runtime errors
     error.value = e.message
   }
 }
 </script>
+
+<style scoped>
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.animate-float-slow {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-medium {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-float-fast {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
+}
+</style>

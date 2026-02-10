@@ -12,6 +12,14 @@
       <div class="absolute inset-0 overflow-hidden pointer-events-none">
         <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
         <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl"></div>
+        
+        <!-- Motto Text -->
+        <div class="absolute inset-0 flex items-center justify-center p-12 text-center pointer-events-none">
+          <h2 class="text-5xl md:text-6xl lg:text-7xl text-white drop-shadow-lg leading-tight" 
+              style="font-family: 'Satisfy', cursive; text-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+            To find a prince,<br>you've got to kiss some toads
+          </h2>
+        </div>
       </div>
     </div>
 
@@ -229,6 +237,7 @@ import { Eye, EyeOff, Loader2, AlertCircle } from 'lucide-vue-next'
 
 const router = useRouter()
 
+// Initialize form state with empty values
 const form = ref({
   firstName: '',
   lastName: '',
@@ -250,6 +259,11 @@ const form = ref({
 const showPassword = ref(false)
 const error = ref(null)
 
+/**
+ * GraphQL Mutation: RegisterUser
+ * Creates a new user account. Returns the session token upon successful creation,
+ * allowing for immediate login.
+ */
 const REGISTER_USER = gql`
   mutation RegisterUser($input: RegisterUserInput!) {
     registerUser(input: $input) {
@@ -262,21 +276,35 @@ const REGISTER_USER = gql`
 
 const { mutate: registerUser, loading } = useMutation(REGISTER_USER)
 
+// Extract province keys for the dropdown selection
 const provinces = Object.keys(provinceCities)
 
+/**
+ * Computed property to derive available cities based on the selected province.
+ * This ensures the city dropdown is always relevant to the user's location selection.
+ */
 const availableCities = computed(() => {
   if (!form.value.province) return []
   return provinceCities[form.value.province] || []
 })
 
+// Reset city selection when province changes to maintain data integrity
 const onProvinceChange = () => {
   form.value.city = ''
 }
 
+/**
+ * Real-time validation for password confirmation.
+ * Returns true if the password confirmation field is populated but does not match the password.
+ */
 const passwordMismatch = computed(() => {
   return form.value.confirmPassword.length > 0 && form.value.password !== form.value.confirmPassword
 })
 
+/**
+ * Helper function to calculate age from birthdate.
+ * precise calculation accounting for month and day boundaries.
+ */
 const calculateAge = (birthdate) => {
   const today = new Date()
   const birth = new Date(birthdate)
@@ -288,10 +316,19 @@ const calculateAge = (birthdate) => {
   return age
 }
 
+/**
+ * Form submission handler for User Registration.
+ * Performs client-side validation before dispatching the GraphQL mutation.
+ * 
+ * Validations:
+ * 1. Age check (Must be 18+)
+ * 2. Password matching
+ * 3. Mobile number format (10-15 digits)
+ */
 const handleRegister = async () => {
   error.value = null
 
-  // Age validation
+  // Enforce Age Restriction (18+)
   if (form.value.birthdate) {
     const age = calculateAge(form.value.birthdate)
     if (age < 18) {
@@ -300,13 +337,14 @@ const handleRegister = async () => {
     }
   }
 
-  // Password match
+  // Validate Password Integrity
   if (form.value.password !== form.value.confirmPassword) {
     error.value = "Passwords do not match"
     return
   }
 
-  // Mobile validation
+  // Optimize Mobile Number Validation
+  // Accepts optional leading '+' and 10 to 15 digits
   if (!/^\+?\d{10,15}$/.test(form.value.mobile)) {
     error.value = "Mobile number must be 10-15 digits"
     return
@@ -335,6 +373,7 @@ const handleRegister = async () => {
     if (data.registerUser.errors.length) {
       error.value = data.registerUser.errors.join(', ')
     } else {
+      // Successful registration: persist token and redirect to photo upload flow
       localStorage.setItem('token', data.registerUser.token)
       router.push('/upload-photos')
     }

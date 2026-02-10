@@ -5,7 +5,6 @@
       <!-- Logo - Top Left -->
       <div class="absolute top-8 left-12 flex items-center gap-3">
         <img src="/icon.png" alt="MatchPoint" class="w-12 h-12 object-contain drop-shadow-lg rounded-xl" />
-        <span class="text-3xl text-white" style="font-family: 'Satisfy', cursive;">MatchPoint</span>
       </div>
       
       <!-- Decorative elements -->
@@ -29,7 +28,6 @@
       <!-- Mobile Logo -->
       <div class="md:hidden flex items-center gap-3 mb-6 flex-shrink-0">
         <img src="/icon.png" alt="MatchPoint" class="w-10 h-10 object-contain rounded-xl" />
-        <span class="text-2xl text-white" style="font-family: 'Satisfy', cursive;">MatchPoint</span>
       </div>
 
       <!-- Card 1: Main Form -->
@@ -396,3 +394,17 @@ const handleRegister = async () => {
   }
 }
 </script>
+
+<style scoped>
+/* Target the date input calendar picker */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(100%) grayscale(100%);
+  cursor: pointer;
+  opacity: 1;
+  transition: filter 0.2s;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  filter: invert(1) brightness(120%) grayscale(100%);
+}
+</style>
